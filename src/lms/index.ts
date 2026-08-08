@@ -472,8 +472,8 @@ export type PageSummary = {
 
 /** A page from a student's perspective — extends PageSummary with personal visit state.
  *  visitedAt: null = unlocked but unvisited. ISO 8601 string = timestamp of first visit.
- *  Used in StudentCurriculum and LearnPageDetail when fetched in student context.
- *  Never present in admin contexts — admin preview sees no visit state. */
+ *  Used in AdminPreviewPage when fetched in admin preview context.
+ *  Never present in student contexts — students use StudentCohortPage with firstVisitedAt/lastVisitedAt. */
 export type StudentPage = PageSummary & {
   visitedAt: string | null;
 };
@@ -506,7 +506,6 @@ export type StudentCohortUnit = {
 };
 
 /** Canonical student-facing curriculum for a cohort.
- *  Replaces both LearnCurriculum and StudentCurriculum.
  *  The cohort sub-object is lean — carries only unitLabel and status beyond
  *  standard identity fields (the two fields toStudentProgress requires). */
 export type StudentCohortCurriculum = {
@@ -520,29 +519,10 @@ export type StudentCohortCurriculum = {
   units: StudentCohortUnit[];
 };
 
-/** @deprecated Use StudentCohortCurriculum instead. Retained for backward compatibility.
- *  Response from GET /lms/learn/:cohortSlug — shell data for persistent chrome.
- *  Enrollment-gated. Published pages only, locked units respected.
- *  Does not include MDX content or signed media URLs. */
-export type LearnCurriculum = {
-  cohort: {
-    cohortSlug: string;
-    campName:   string;
-    cohortName: string;
-  };
-  curriculum: {
-    unitId:   string;
-    title:    string;
-    position: number;
-    isLocked: boolean;
-    pages:    StudentPage[];
-  }[];
-};
-
-/** @deprecated Use LearnPageContent for student contexts. Retained for admin preview path.
- *  Response from GET /lms/learn/:cohortSlug/:pageSlug */
-export type LearnPageDetail = {
-  page: Page & { mdxContent: string };
+/** Response from GET /lms/admin/learn/:cohortSlug/:pageSlug — admin preview context.
+ *  Carries the full curriculum tree for the preview shell sidebar. */
+export type AdminPreviewPage = {
+  page: Page & { mdxContent: string; video?: PageVideo };
   unit: {
     unitId:   string;
     title:    string;
@@ -555,7 +535,6 @@ export type LearnPageDetail = {
     campName:   string;
     cohortName: string;
   };
-  /** Full curriculum tree — published pages only, enriched with visitedAt for checkmarks + navigation. */
   curriculum: {
     unitId:   string;
     title:    string;
@@ -563,31 +542,16 @@ export type LearnPageDetail = {
     isLocked: boolean;
     pages:    StudentPage[];
   }[];
-  /** Resolved media for inline MDX components — keyed by mediaId. */
   resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
 
-/** Slim response for student article body. Replaces LearnPageDetail on the student path.
+/** Slim response for student article body. Used on the student learn path.
  *  The learn chrome gets curriculum/unit metadata from the TQ cache, not this payload. */
 export type LearnPageContent = {
   page: { pageId: string; slug: string; title: string; layout: PageLayout; video?: PageVideo; mdxContent: string };
   unit: Pick<Unit, 'unitId' | 'title' | 'position'>;
   cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
   resolvedMedia?: Record<string, ResolvedMedia | null>;
-};
-
-/** @deprecated Use StudentCohortCurriculum instead. Retained for backward compatibility.
- *  Student-facing curriculum tree — focused shape, no raw entity fields, visit state included.
- *  Replaces the former (Unit & { pages: Page[] })[] entity dump. */
-export type StudentCurriculum = {
-  units: {
-    unitId:       string;
-    title:        string;
-    position:     number;
-    isLocked:     boolean;
-    description?: string;
-    pages:        StudentPage[];
-  }[];
 };
 
 /** Admin curriculum tree — all units and all pages including drafts. */
