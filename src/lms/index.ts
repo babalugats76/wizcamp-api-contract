@@ -623,7 +623,7 @@ export type AdminPageDetail = Page & {
 
 /** Fields any authenticated user can read via GET /lms/students/me/settings */
 export type UserSettings = {
-  aiKey?: string;
+  openRouterKey?: string;
   theme?: UserTheme;
 };
 
