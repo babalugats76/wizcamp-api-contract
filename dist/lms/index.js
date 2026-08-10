@@ -1,10 +1,10 @@
 "use strict";
 // packages/api-contract/src/lms/index.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StudentRole = exports.MediaKind = exports.UserTheme = exports.StudentStatus = exports.PageLayout = exports.PageStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.ProgressStatus = exports.EnrollmentStatus = exports.VideoSourceType = exports.CohortStatus = exports.AiKeyLimitReset = void 0;
+exports.StudentRole = exports.MediaKind = exports.UserTheme = exports.StudentStatus = exports.PageLayout = exports.PageStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.ProgressStatus = exports.EnrollmentStatus = exports.VideoSourceType = exports.CohortStatus = exports.OpenRouterKeyLimitReset = void 0;
 exports.toStudentProgress = toStudentProgress;
 // ─── Enums / Union Types ──────────────────────────────────────────────────────
-exports.AiKeyLimitReset = {
+exports.OpenRouterKeyLimitReset = {
     NONE: 'none',
     DAILY: 'daily',
     WEEKLY: 'weekly',

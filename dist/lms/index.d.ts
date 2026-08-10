@@ -13,13 +13,13 @@
 import type { MediaImage, MediaVideo, CampLevel } from '../common';
 import { CampLevelColor } from '../common';
 export type { CampLevelColor };
-export declare const AiKeyLimitReset: {
+export declare const OpenRouterKeyLimitReset: {
     readonly NONE: "none";
     readonly DAILY: "daily";
     readonly WEEKLY: "weekly";
     readonly MONTHLY: "monthly";
 };
-export type AiKeyLimitReset = (typeof AiKeyLimitReset)[keyof typeof AiKeyLimitReset];
+export type OpenRouterKeyLimitReset = (typeof OpenRouterKeyLimitReset)[keyof typeof OpenRouterKeyLimitReset];
 export declare const CohortStatus: {
     readonly DRAFT: "draft";
     readonly ACTIVE: "active";
@@ -550,7 +550,7 @@ export type AdminSettings = UserSettings & AdminOnlySettings;
  *
  * Returns null when no key is provisioned for the student.
  */
-export type AiKeyMetadata = {
+export type OpenRouterKeyMetadata = {
     hash: string;
     name: string;
     label: string;
@@ -560,30 +560,30 @@ export type AiKeyMetadata = {
     usageMonthly: number | null;
     limit: number | null;
     limitRemaining: number | null;
-    limitReset: AiKeyLimitReset;
+    limitReset: OpenRouterKeyLimitReset;
     expiresAt: string | null;
     createdAt: string;
     updatedAt: string;
     disabled: boolean;
 };
 /** PATCH /lms/admin/students/:studentId/settings/api-key — SDK-verified against UpdateKeysRequestBody. */
-export type AiKeyUpdateInput = {
+export type OpenRouterKeyUpdateInput = {
     name?: string;
     limit?: number | null;
-    limitReset?: AiKeyLimitReset;
+    limitReset?: OpenRouterKeyLimitReset;
     disabled?: boolean;
 };
 /** POST /lms/admin/students/:studentId/settings/api-key — SDK-verified against CreateKeysRequestBody. */
-export type AiKeyProvisionInput = {
+export type OpenRouterKeyProvisionInput = {
     name?: string;
     limit?: number | null;
-    limitReset?: AiKeyLimitReset;
+    limitReset?: OpenRouterKeyLimitReset;
     expiresAt?: string | null;
 };
 /** POST /lms/admin/students/:studentId/settings/api-key — provision response.
- *  Extends AiKeyMetadata with the plaintext key, which is only available at
+ *  Extends OpenRouterKeyMetadata with the plaintext key, which is only available at
  *  creation time and is never returned again. */
-export type AiKeyProvisionResult = AiKeyMetadata & {
+export type OpenRouterKeyProvisionResult = OpenRouterKeyMetadata & {
     apiKey: string;
 };
 /** AI model option — used by OpenRouter (and potentially other providers) to

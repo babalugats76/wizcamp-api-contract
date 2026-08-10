@@ -19,13 +19,13 @@ export type { CampLevelColor };
 
 // ─── Enums / Union Types ──────────────────────────────────────────────────────
 
-export const AiKeyLimitReset = {
+export const OpenRouterKeyLimitReset = {
   NONE:    'none',
   DAILY:   'daily',
   WEEKLY:  'weekly',
   MONTHLY: 'monthly',
 } as const;
-export type AiKeyLimitReset = (typeof AiKeyLimitReset)[keyof typeof AiKeyLimitReset];
+export type OpenRouterKeyLimitReset = (typeof OpenRouterKeyLimitReset)[keyof typeof OpenRouterKeyLimitReset];
 
 export const CohortStatus = {
   DRAFT:     'draft',
@@ -647,43 +647,43 @@ export type AdminSettings = UserSettings & AdminOnlySettings;
  *
  * Returns null when no key is provisioned for the student.
  */
-export type AiKeyMetadata = {
-  hash: string;                      // key hash — never the full key
-  name: string;                      // key name set at provision time
-  label: string;                     // display label
-  usage: number;                     // total lifetime usage (USD)
-  usageDaily: number | null;         // current day usage (USD) — null on fresh keys
-  usageWeekly: number | null;        // current week usage (USD) — null on fresh keys
-  usageMonthly: number | null;       // current month usage (USD) — null on fresh keys
-  limit: number | null;              // credit limit (null = unlimited)
-  limitRemaining: number | null;     // remaining credits (null = unlimited)
-  limitReset: AiKeyLimitReset;       // reset cadence
-  expiresAt: string | null;          // ISO 8601 (null = never expires)
-  createdAt: string;                 // ISO 8601
-  updatedAt: string;                 // ISO 8601
+export type OpenRouterKeyMetadata = {
+  hash: string;                          // key hash — never the full key
+  name: string;                          // key name set at provision time
+  label: string;                         // display label
+  usage: number;                         // total lifetime usage (USD)
+  usageDaily: number | null;             // current day usage (USD) — null on fresh keys
+  usageWeekly: number | null;            // current week usage (USD) — null on fresh keys
+  usageMonthly: number | null;           // current month usage (USD) — null on fresh keys
+  limit: number | null;                  // credit limit (null = unlimited)
+  limitRemaining: number | null;         // remaining credits (null = unlimited)
+  limitReset: OpenRouterKeyLimitReset;   // reset cadence
+  expiresAt: string | null;              // ISO 8601 (null = never expires)
+  createdAt: string;                     // ISO 8601
+  updatedAt: string;                     // ISO 8601
   disabled: boolean;
 };
 
 /** PATCH /lms/admin/students/:studentId/settings/api-key — SDK-verified against UpdateKeysRequestBody. */
-export type AiKeyUpdateInput = {
+export type OpenRouterKeyUpdateInput = {
   name?: string;
   limit?: number | null;
-  limitReset?: AiKeyLimitReset;
+  limitReset?: OpenRouterKeyLimitReset;
   disabled?: boolean;
 };
 
 /** POST /lms/admin/students/:studentId/settings/api-key — SDK-verified against CreateKeysRequestBody. */
-export type AiKeyProvisionInput = {
+export type OpenRouterKeyProvisionInput = {
   name?: string;
   limit?: number | null;
-  limitReset?: AiKeyLimitReset;
+  limitReset?: OpenRouterKeyLimitReset;
   expiresAt?: string | null;
 };
 
 /** POST /lms/admin/students/:studentId/settings/api-key — provision response.
- *  Extends AiKeyMetadata with the plaintext key, which is only available at
+ *  Extends OpenRouterKeyMetadata with the plaintext key, which is only available at
  *  creation time and is never returned again. */
-export type AiKeyProvisionResult = AiKeyMetadata & {
+export type OpenRouterKeyProvisionResult = OpenRouterKeyMetadata & {
   apiKey: string;
 };
 
