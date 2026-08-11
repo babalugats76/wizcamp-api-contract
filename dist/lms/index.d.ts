@@ -272,6 +272,7 @@ export type Page = {
     video?: PageVideo;
     createdAt: string;
     updatedAt: string;
+    version: number;
 };
 export type MediaPoster = {
     s3Key: string;

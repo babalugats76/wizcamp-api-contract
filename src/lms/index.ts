@@ -309,6 +309,7 @@ export type Page = {
   video?: PageVideo;         // present when layout === 'video'
   createdAt: string;
   updatedAt: string;
+  version: number;    // OCC token - echo back on writes; never display
 };
 
 export type MediaPoster = {
