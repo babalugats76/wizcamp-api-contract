@@ -555,9 +555,9 @@ export type OpenRouterKeyMetadata = {
     name: string;
     label: string;
     usage: number;
-    usageDaily: number | null;
-    usageWeekly: number | null;
-    usageMonthly: number | null;
+    usageDaily: number;
+    usageWeekly: number;
+    usageMonthly: number;
     limit: number | null;
     limitRemaining: number | null;
     limitReset: OpenRouterKeyLimitReset;
