@@ -652,9 +652,9 @@ export type OpenRouterKeyMetadata = {
   name: string;                          // key name set at provision time
   label: string;                         // display label
   usage: number;                         // total lifetime usage (USD)
-  usageDaily: number | null;             // current day usage (USD) — null on fresh keys
-  usageWeekly: number | null;            // current week usage (USD) — null on fresh keys
-  usageMonthly: number | null;           // current month usage (USD) — null on fresh keys
+  usageDaily: number;                    // current day usage (USD) — 0 on fresh keys
+  usageWeekly: number;                   // current week usage (USD) — 0 on fresh keys
+  usageMonthly: number;                  // current month usage (USD) — 0 on fresh keys
   limit: number | null;                  // credit limit (null = unlimited)
   limitRemaining: number | null;         // remaining credits (null = unlimited)
   limitReset: OpenRouterKeyLimitReset;   // reset cadence
