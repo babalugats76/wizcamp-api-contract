@@ -114,19 +114,13 @@ exports.StudentRole = {
  */
 function toStudentProgress(curriculum) {
     const { cohort, units } = curriculum;
-    // Page → unit lookup (StudentCohortPage doesn't carry unitId)
-    const unitByPageId = new Map();
-    for (const unit of units) {
-        for (const page of unit.pages) {
-            unitByPageId.set(page.pageId, unit);
-        }
-    }
+    // Unit lookup by unitId
+    const unitById = new Map(units.map(u => [u.unitId, u]));
     const allPages = units.flatMap(u => u.pages);
     // Visited page IDs — firstVisitedAt is write-once (non-null = visited)
     const visitedIds = new Set(allPages.filter(p => p.firstVisitedAt !== null).map(p => p.pageId));
     // Available pages — published pages in unlocked units only (drip-aware)
-    const unlockedUnitIds = new Set(units.filter(u => !u.isLocked).map(u => u.unitId));
-    const availablePages = allPages.filter(p => unlockedUnitIds.has(unitByPageId.get(p.pageId).unitId));
+    const availablePages = allPages.filter(p => !unitById.get(p.unitId)?.isLocked);
     const pagesAvailable = availablePages.length;
     const pagesVisited = availablePages.filter(p => visitedIds.has(p.pageId)).length;
     // Status
@@ -135,11 +129,7 @@ function toStudentProgress(curriculum) {
             units.some(u => u.isLocked) ? exports.ProgressStatus.CAUGHT_UP :
                 exports.ProgressStatus.COMPLETED;
     // Sort available pages by unit position then page position
-    const sortedAvailable = [...availablePages].sort((a, b) => {
-        const ua = unitByPageId.get(a.pageId);
-        const ub = unitByPageId.get(b.pageId);
-        return (ua?.position ?? 0) - (ub?.position ?? 0) || a.position - b.position;
-    });
+    const sortedAvailable = [...availablePages].sort((a, b) => (unitById.get(a.unitId)?.position ?? 0) - (unitById.get(b.unitId)?.position ?? 0) || a.position - b.position);
     // Last visited available page — scoped to unlocked units so resumeTarget
     // for CAUGHT_UP is always navigable.
     const lastVisited = availablePages
@@ -147,7 +137,7 @@ function toStudentProgress(curriculum) {
         .reduce((acc, p) => (!acc || p.lastVisitedAt > acc.lastVisitedAt ? p : acc), null);
     // Helper: build StudentProgressPage from a StudentCohortPage
     function toProgressPage(page) {
-        const unit = unitByPageId.get(page.pageId);
+        const unit = unitById.get(page.unitId);
         return {
             slug: page.slug,
             title: page.title,
@@ -185,7 +175,7 @@ function toStudentProgress(curriculum) {
         pagesVisited,
         pagesAvailable,
         progressPct: pagesAvailable > 0 ? Math.round(pagesVisited / pagesAvailable * 100) : 0,
-        dripPct: units.length > 0 ? Math.round(unlockedUnitIds.size / units.length * 100) : 0,
+        dripPct: units.length > 0 ? Math.round(units.filter(u => !u.isLocked).length / units.length * 100) : 0,
     };
 }
 //# sourceMappingURL=index.js.map
