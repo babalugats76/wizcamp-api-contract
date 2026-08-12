@@ -17,6 +17,17 @@ import type { MediaImage, MediaVideo, CampLevel } from '../common';
 import { CampLevelColor } from '../common';
 export type { CampLevelColor };
 
+// ─── Utility Types ────────────────────────────────────────────────────────────
+
+/** Maps Date → string for JSONB-sourced rows where pg type parsers do not run. */
+export type Jsonified<T> = {
+  [K in keyof T]: T[K] extends Date
+    ? string
+    : T[K] extends Date | null
+    ? string | null
+    : T[K];
+};
+
 // ─── Enums / Union Types ──────────────────────────────────────────────────────
 
 export const OpenRouterKeyLimitReset = {
@@ -482,14 +493,8 @@ export type StudentPage = PageSummary & {
 /** Unified student-facing page in a cohort curriculum.
  *  Replaces StudentPage in new codepaths. firstVisitedAt is write-once (first visit);
  *  lastVisitedAt tracks the most recent visit for toStudentProgress's lastPage. */
-export type StudentCohortPage = {
-  pageId: string;
-  slug: string;
-  title: string;
-  position: number;
-  status: PageStatus;
-  layout: PageLayout;
-  video?: PageVideoSummary;
+export type StudentCohortPage = PageSummary & {
+  unitId: string;
   firstVisitedAt: string | null;
   lastVisitedAt: string | null;
 };
@@ -555,10 +560,9 @@ export type LearnPageContent = {
   resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
 
-/** Admin curriculum tree — all units and all pages including drafts. */
+/** Admin curriculum tree — all units with their pages nested, including drafts. */
 export type AdminCurriculum = {
-  units: Unit[];
-  pages: Page[];
+  units: (Unit & { pages: Page[] })[];
 };
 
 /** POST /lms/admin/enrollments — enrollment + onboarding signal. */
@@ -780,13 +784,8 @@ export function toStudentProgress(
 ): StudentProgress {
   const { cohort, units } = curriculum;
 
-  // Page → unit lookup (StudentCohortPage doesn't carry unitId)
-  const unitByPageId = new Map<string, StudentCohortUnit>();
-  for (const unit of units) {
-    for (const page of unit.pages) {
-      unitByPageId.set(page.pageId, unit);
-    }
-  }
+  // Unit lookup by unitId
+  const unitById = new Map(units.map(u => [u.unitId, u]));
 
   const allPages = units.flatMap(u => u.pages);
 
@@ -796,10 +795,7 @@ export function toStudentProgress(
   );
 
   // Available pages — published pages in unlocked units only (drip-aware)
-  const unlockedUnitIds = new Set(units.filter(u => !u.isLocked).map(u => u.unitId));
-  const availablePages = allPages.filter(p =>
-    unlockedUnitIds.has(unitByPageId.get(p.pageId)!.unitId),
-  );
+  const availablePages = allPages.filter(p => !unitById.get(p.unitId)?.isLocked);
 
   const pagesAvailable = availablePages.length;
   const pagesVisited = availablePages.filter(p => visitedIds.has(p.pageId)).length;
@@ -812,11 +808,9 @@ export function toStudentProgress(
                                     ProgressStatus.COMPLETED;
 
   // Sort available pages by unit position then page position
-  const sortedAvailable = [...availablePages].sort((a, b) => {
-    const ua = unitByPageId.get(a.pageId);
-    const ub = unitByPageId.get(b.pageId);
-    return (ua?.position ?? 0) - (ub?.position ?? 0) || a.position - b.position;
-  });
+  const sortedAvailable = [...availablePages].sort((a, b) =>
+    (unitById.get(a.unitId)?.position ?? 0) - (unitById.get(b.unitId)?.position ?? 0) || a.position - b.position,
+  );
 
   // Last visited available page — scoped to unlocked units so resumeTarget
   // for CAUGHT_UP is always navigable.
@@ -829,7 +823,7 @@ export function toStudentProgress(
 
   // Helper: build StudentProgressPage from a StudentCohortPage
   function toProgressPage(page: StudentCohortPage): StudentProgressPage {
-    const unit = unitByPageId.get(page.pageId);
+    const unit = unitById.get(page.unitId);
     return {
       slug: page.slug,
       title: page.title,
@@ -870,6 +864,6 @@ export function toStudentProgress(
     pagesVisited,
     pagesAvailable,
     progressPct: pagesAvailable > 0 ? Math.round(pagesVisited / pagesAvailable * 100) : 0,
-    dripPct: units.length > 0 ? Math.round(unlockedUnitIds.size / units.length * 100) : 0,
+    dripPct: units.length > 0 ? Math.round(units.filter(u => !u.isLocked).length / units.length * 100) : 0,
   };
 }

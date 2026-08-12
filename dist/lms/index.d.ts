@@ -13,6 +13,10 @@
 import type { MediaImage, MediaVideo, CampLevel } from '../common';
 import { CampLevelColor } from '../common';
 export type { CampLevelColor };
+/** Maps Date → string for JSONB-sourced rows where pg type parsers do not run. */
+export type Jsonified<T> = {
+    [K in keyof T]: T[K] extends Date ? string : T[K] extends Date | null ? string | null : T[K];
+};
 export declare const OpenRouterKeyLimitReset: {
     readonly NONE: "none";
     readonly DAILY: "daily";
@@ -399,14 +403,8 @@ export type StudentPage = PageSummary & {
 /** Unified student-facing page in a cohort curriculum.
  *  Replaces StudentPage in new codepaths. firstVisitedAt is write-once (first visit);
  *  lastVisitedAt tracks the most recent visit for toStudentProgress's lastPage. */
-export type StudentCohortPage = {
-    pageId: string;
-    slug: string;
-    title: string;
-    position: number;
-    status: PageStatus;
-    layout: PageLayout;
-    video?: PageVideoSummary;
+export type StudentCohortPage = PageSummary & {
+    unitId: string;
     firstVisitedAt: string | null;
     lastVisitedAt: string | null;
 };
@@ -477,10 +475,11 @@ export type LearnPageContent = {
     cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
     resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
-/** Admin curriculum tree — all units and all pages including drafts. */
+/** Admin curriculum tree — all units with their pages nested, including drafts. */
 export type AdminCurriculum = {
-    units: Unit[];
-    pages: Page[];
+    units: (Unit & {
+        pages: Page[];
+    })[];
 };
 /** POST /lms/admin/enrollments — enrollment + onboarding signal. */
 export type AdminEnrollmentCreateResponse = {
