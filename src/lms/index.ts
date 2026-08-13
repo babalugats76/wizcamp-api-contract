@@ -228,11 +228,18 @@ export type Cohort = {
 
 /** Lean cohort row for list endpoints — carries pre-aggregated counts that are
  *  efficient to compute at list-query time but do not belong on the entity. */
-export type CohortSummary =
-  Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'format' | 'unitLabel' | 'status' | 'startDate' | 'endDate'> & {
-    unitCount: number;
-    enrollmentCounts: EnrollmentCounts;
-  };
+export type CohortSummary = {
+  cohortSlug:       string;
+  campName:         string;
+  cohortName:       string;
+  format:           CohortFormat;
+  unitLabel:        UnitLabel;
+  status:           CohortStatus;
+  startDate:        string;
+  endDate:          string;
+  unitCount:        number;
+  enrollmentCounts: EnrollmentCounts;
+};
 
 export type Unit = {
   unitId: string;
@@ -287,7 +294,10 @@ export type PageVideo = {
 
 /** Lightweight video descriptor for list/TOC contexts — sourceType + duration only.
  *  Full URL resolution is unnecessary for sidebar/badge rendering. */
-export type VideoMeta = Pick<PageVideo, 'sourceType' | 'duration'>;
+export type VideoMeta = {
+  sourceType: VideoSourceType;
+  duration?: number;
+};
 
 export type Page = {
   cohortSlug: string;
@@ -307,8 +317,14 @@ export type Page = {
 /** Navigation-ready page descriptor. Used in admin and student contexts.
  *  Replaces the retired PageTOCItem — named for what it models, not the UI widget that displays it.
  *  video is VideoMeta (not PageVideo) — only source type + duration needed for TOC/sidebar rendering. */
-export type PageSummary = Pick<Page, 'pageId' | 'slug' | 'title' | 'position' | 'status' | 'layout'> & {
-  video?: VideoMeta;
+export type PageSummary = {
+  pageId:   string;
+  slug:     string;
+  title:    string;
+  position: number;
+  status:   PageStatus;
+  layout:   PageLayout;
+  video?:   VideoMeta;
 };
 
 export type MediaPoster = {
@@ -440,9 +456,13 @@ export type CurriculumPage = PageSummary & {
 /** Unified student-facing unit in a cohort curriculum.
  *  Locked units are present as descriptors; their pages carry null visit timestamps.
  *  description is optional (vs Unit's string | null) — absent means not set, never rendered. */
-export type CurriculumUnit = Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked'> & {
+export type CurriculumUnit = {
+  unitId:       string;
+  title:        string;
+  position:     number;
+  isLocked:     boolean;
   description?: string;
-  pages: CurriculumPage[];
+  pages:        CurriculumPage[];
 };
 
 /** Canonical student-facing curriculum for a cohort.
