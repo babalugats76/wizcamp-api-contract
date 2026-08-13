@@ -303,16 +303,10 @@ export type VideoMeta = {
 };
 
 /** Navigation-ready page descriptor. Used in admin and student contexts.
- *  Base type extended by StudentPage for student-specific visit state.
- *  Replaces the retired PageTOCItem — named for what it models, not the UI widget that displays it. */
-export type PageSummary = {
-  pageId:    string;
-  slug:      string;
-  title:     string;
-  position:  number;
-  status:    PageStatus;
-  layout:    PageLayout;
-  video?:    VideoMeta;
+ *  Replaces the retired PageTOCItem — named for what it models, not the UI widget that displays it.
+ *  video is VideoMeta (not PageVideo) — only source type + duration needed for TOC/sidebar rendering. */
+export type PageSummary = Pick<Page, 'pageId' | 'slug' | 'title' | 'position' | 'status' | 'layout'> & {
+  video?: VideoMeta;
 };
 
 export type Page = {
@@ -457,12 +451,9 @@ export type CurriculumPage = PageSummary & {
 };
 
 /** Unified student-facing unit in a cohort curriculum.
- *  Locked units are present as descriptors; their pages carry null visit timestamps. */
-export type CurriculumUnit = {
-  unitId: string;
-  title: string;
-  position: number;
-  isLocked: boolean;
+ *  Locked units are present as descriptors; their pages carry null visit timestamps.
+ *  description is optional (vs Unit's string | null) — absent means not set, never rendered. */
+export type CurriculumUnit = Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked'> & {
   description?: string;
   pages: CurriculumPage[];
 };
