@@ -680,25 +680,9 @@ export type AdminStudent = Student & {
  *  Carries the full curriculum tree for the preview shell sidebar. */
 export type AdminPreview = {
   page: Page & { mdxContent: string; video?: PageVideo };
-  unit: {
-    unitId:   string;
-    title:    string;
-    position: number;
-    isLocked: boolean;
-    pages:    PageSummary[];
-  };
-  cohort: {
-    cohortSlug: string;
-    campName:   string;
-    cohortName: string;
-  };
-  curriculum: {
-    unitId:   string;
-    title:    string;
-    position: number;
-    isLocked: boolean;
-    pages:    PageSummary[];
-  }[];
+  unit: Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked'> & { pages: PageSummary[] };
+  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
+  curriculum: (Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked'> & { pages: PageSummary[] })[];
   resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
 
