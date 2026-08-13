@@ -6,11 +6,14 @@
  * Or via subpath: import type { Cohort } from '@wizcamp/api-contract/lms'
  *
  * Naming conventions:
- * - Core entities: bare name (Cohort, Unit, Page) — namespace provides domain context
- * - Enums: bare name (CohortStatus, EnrollmentStatus)
- * - Surface DTOs: surface prefix (AdminCohortDetail, StudentDashboard)
- * - Building blocks: bare name (EnrollmentCounts, MeetingSlot)
- * - Auth types: Auth prefix (AuthUser)
+ * - Core entities: bare name (Cohort, Unit, Page)
+ * - Enums & constants: bare name (CohortStatus, EnrollmentStatus, SLUG_REGEX)
+ * - Admin-privileged DTOs: Admin* prefix (AdminEnrollment, AdminCurriculum, AdminPreview, AdminStudent)
+ * - Composed read DTOs: *View suffix (AdminCohortView, EnrolledCohort)
+ * - HTTP response bodies: *Response suffix
+ * - Internal operation results: *Result suffix
+ * - Auth types: Auth* prefix (AuthUser)
+ * - List-endpoint DTOs: *Summary suffix (CohortSummary)
  */
 
 import type { MediaImage, MediaVideo, CampLevel } from '../common';
@@ -28,15 +31,30 @@ export type Jsonified<T> = {
     : T[K];
 };
 
-// ─── Enums / Union Types ──────────────────────────────────────────────────────
+// ─── Enums & Constants ───────────────────────────────────────────────────────
 
-export const OpenRouterKeyLimitReset = {
-  NONE:    'none',
-  DAILY:   'daily',
-  WEEKLY:  'weekly',
-  MONTHLY: 'monthly',
+export const UserRole = {
+  STUDENT: 'student',
+  ADMIN:   'admin',
 } as const;
-export type OpenRouterKeyLimitReset = (typeof OpenRouterKeyLimitReset)[keyof typeof OpenRouterKeyLimitReset];
+export type UserRole = (typeof UserRole)[keyof typeof UserRole];
+
+export type OAuthProvider = 'google' | 'github';
+
+export type OnboardingMode = 'activation' | 'access';
+
+export const StudentStatus = {
+  ACTIVE:    'active',
+  SUSPENDED: 'suspended',
+} as const;
+export type StudentStatus = (typeof StudentStatus)[keyof typeof StudentStatus];
+
+export const UserTheme = {
+  LIGHT:  'light',
+  DARK:   'dark',
+  SYSTEM: 'system',
+} as const;
+export type UserTheme = (typeof UserTheme)[keyof typeof UserTheme];
 
 export const CohortStatus = {
   DRAFT:     'draft',
@@ -44,6 +62,45 @@ export const CohortStatus = {
   CONCLUDED: 'concluded',
 } as const;
 export type CohortStatus = (typeof CohortStatus)[keyof typeof CohortStatus];
+
+export const CohortFormat = {
+  FLEX:       'flex',
+  BOOT:       'boot',
+  SELF_PACED: 'self-paced',
+} as const;
+export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
+
+/** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
+export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+export const UnitLabel = {
+  SESSION: 'Session',
+  WEEK:    'Week',
+  MODULE:  'Module',
+  DAY:     'Day',
+  PART:    'Part',
+  UNIT:    'Unit',
+} as const;
+export type UnitLabel = (typeof UnitLabel)[keyof typeof UnitLabel];
+
+export const EnrollmentStatus = {
+  PENDING_ONBOARDING: 'pending_onboarding',
+  ACTIVE:             'active',
+  REMOVED:            'removed',
+} as const;
+export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus];
+
+export const PageStatus = {
+  DRAFT:     'draft',
+  PUBLISHED: 'published',
+} as const;
+export type PageStatus = (typeof PageStatus)[keyof typeof PageStatus];
+
+export const PageLayout = {
+  DOC:   'doc',
+  VIDEO: 'video',
+} as const;
+export type PageLayout = (typeof PageLayout)[keyof typeof PageLayout];
 
 export const VideoSourceType = {
   EXTERNAL: 'external',
@@ -59,26 +116,12 @@ export type VideoSource =
   | { type: typeof VideoSourceType.LOOM;     loomVideoId: string }
   | { type: typeof VideoSourceType.YOUTUBE;  youtubeVideoId: string };
 
-export const EnrollmentStatus = {
-  PENDING_ONBOARDING: 'pending_onboarding',
-  ACTIVE:             'active',
-  REMOVED:            'removed',
+export const MediaKind = {
+  VIDEO: 'video',
+  IMAGE: 'image',
+  FILE:  'file',
 } as const;
-export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus];
-
-export const ProgressStatus = {
-  NOT_STARTED: 'not_started',
-  IN_PROGRESS: 'in_progress',
-  CAUGHT_UP:   'caught_up',
-  COMPLETED:   'completed',
-} as const;
-export type ProgressStatus = (typeof ProgressStatus)[keyof typeof ProgressStatus];
-
-export type OAuthProvider = 'google' | 'github';
-
-export type OnboardingMode = 'activation' | 'access';
-
-// ─── Meeting Types ────────────────────────────────────────────────────────────
+export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind];
 
 export const MeetingType = {
   CLASS:        'class',        // scheduled instructional session
@@ -109,90 +152,29 @@ export const MeetingAudience = {
   COMMUNITY: 'COMMUNITY',  // LMS-wide — all verified members; joinUrl in portal only, never public
   PUBLIC:    'PUBLIC',     // open to anyone — joinUrl exposed on public marketing site
 } as const;
-// An audience is either a sentinel string or a resolved cohort.
-// typeof audience === 'string' → sentinel (MeetingAudience.COMMUNITY or .PUBLIC)
-// typeof audience === 'object' → cohort (campName, cohortName, etc. available directly)
-export type MeetingAudience = 'COMMUNITY' | 'PUBLIC' | MeetingCohort;
 
-// ─── Promoted Enum Objects ────────────────────────────────────────────────────
-
-export const CohortFormat = {
-  FLEX:       'flex',
-  BOOT:       'boot',
-  SELF_PACED: 'self-paced',
+export const ProgressStatus = {
+  NOT_STARTED: 'not_started',
+  IN_PROGRESS: 'in_progress',
+  CAUGHT_UP:   'caught_up',
+  COMPLETED:   'completed',
 } as const;
-export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
+export type ProgressStatus = (typeof ProgressStatus)[keyof typeof ProgressStatus];
 
-/** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
-export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-
-export const UnitLabel = {
-  SESSION: 'Session',
-  WEEK:    'Week',
-  MODULE:  'Module',
-  DAY:     'Day',
-  PART:    'Part',
-  UNIT:    'Unit',
+export const OpenRouterKeyLimitReset = {
+  NONE:    'none',
+  DAILY:   'daily',
+  WEEKLY:  'weekly',
+  MONTHLY: 'monthly',
 } as const;
-export type UnitLabel = (typeof UnitLabel)[keyof typeof UnitLabel];
+export type OpenRouterKeyLimitReset = (typeof OpenRouterKeyLimitReset)[keyof typeof OpenRouterKeyLimitReset];
 
-export const PageStatus = {
-  DRAFT:     'draft',
-  PUBLISHED: 'published',
-} as const;
-export type PageStatus = (typeof PageStatus)[keyof typeof PageStatus];
+// ─── Core Entities ──────────────────────────────────────────────────────────
 
-export const PageLayout = {
-  DOC:   'doc',
-  VIDEO: 'video',
-} as const;
-export type PageLayout = (typeof PageLayout)[keyof typeof PageLayout];
-
-export const StudentStatus = {
-  ACTIVE:    'active',
-  SUSPENDED: 'suspended',
-} as const;
-export type StudentStatus = (typeof StudentStatus)[keyof typeof StudentStatus];
-
-export const UserTheme = {
-  LIGHT:  'light',
-  DARK:   'dark',
-  SYSTEM: 'system',
-} as const;
-export type UserTheme = (typeof UserTheme)[keyof typeof UserTheme];
-
-export const MediaKind = {
-  VIDEO: 'video',
-  IMAGE: 'image',
-  FILE:  'file',
-} as const;
-export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind];
-
-export const StudentRole = {
-  STUDENT: 'student',
-  ADMIN:   'admin',
-} as const;
-export type StudentRole = (typeof StudentRole)[keyof typeof StudentRole];
-
-// ─── Core Entity Types ────────────────────────────────────────────────────────
-
-export type Meeting = {
-  meetingId: string;
-  title: string;
-  agenda: string | null;
-  joinUrl: string;
-  passcode: string | null;
-  startTime: string;           // UTC ISO 8601
-  durationMinutes: number;
-  meetingType: MeetingType;
-  source: MeetingSource;
-  providerMeetingId: string | null;  // Zoom series id (zoom_api source only)
-  occurrenceId: string | null;       // Zoom occurrence_id (recurring zoom_api meetings only)
-  recordingUrl: string | null;       // Zoom share_url — publicly accessible, no auth required
-  recordingPasscode: string | null;  // Zoom recording_play_passcode
-  audiences: MeetingAudience[];  // sentinels or resolved cohorts — never raw IDs on the read side
-  createdAt: string;
-  updatedAt: string;
+/** Fields any authenticated user can read via GET /lms/students/me/settings */
+export type UserSettings = {
+  openRouterKey?: string;
+  theme?: UserTheme;
 };
 
 export type Student = {
@@ -204,7 +186,7 @@ export type Student = {
   avatarSourceUrl: string | null;
   oauthProvider: OAuthProvider;
   oauthProviderId: string;
-  role: StudentRole;
+  role: UserRole;
   status: StudentStatus;
   createdAt: string;
   updatedAt: string;
@@ -240,11 +222,23 @@ export type Cohort = {
   /** Structured difficulty level — copied from camp metadata at cohort-creation time. */
   level: CampLevel | null;
   status: CohortStatus;
-  unitCount: number;
-  enrollmentCounts: EnrollmentCounts;
-  meetings?: Meeting[];
   createdAt: string;
   updatedAt: string;
+};
+
+/** Lean cohort row for list endpoints — carries pre-aggregated counts that are
+ *  efficient to compute at list-query time but do not belong on the entity. */
+export type CohortSummary = {
+  cohortSlug: string;
+  campName: string;
+  cohortName: string;
+  format: CohortFormat;
+  unitLabel: UnitLabel;
+  status: CohortStatus;
+  startDate: string;
+  endDate: string;
+  unitCount: number;
+  enrollmentCounts: EnrollmentCounts;
 };
 
 export type Unit = {
@@ -303,9 +297,22 @@ export type PageVideo = {
  * is unnecessary. Only carries what the curriculum sidebar needs to render
  * the video badge (source icon + duration).
  */
-export type PageVideoSummary = {
+export type VideoMeta = {
   sourceType: VideoSourceType;
   duration?: number;
+};
+
+/** Navigation-ready page descriptor. Used in admin and student contexts.
+ *  Base type extended by StudentPage for student-specific visit state.
+ *  Replaces the retired PageTOCItem — named for what it models, not the UI widget that displays it. */
+export type PageSummary = {
+  pageId:    string;
+  slug:      string;
+  title:     string;
+  position:  number;
+  status:    PageStatus;
+  layout:    PageLayout;
+  video?:    VideoMeta;
 };
 
 export type Page = {
@@ -348,7 +355,67 @@ export type ResolvedMedia = Omit<Media, 's3Key' | 'poster' | 'createdAt'> & {
   posterUrl: string | null;
 };
 
-// ─── Auth Types ───────────────────────────────────────────────────────────────
+// ─── Meeting Types ───────────────────────────────────────────────────────────
+
+export type MeetingCohort = Pick<Cohort,
+  | 'cohortSlug'
+  | 'campName'
+  | 'cohortName'
+  | 'status'
+  | 'startDate'
+  | 'endDate'
+>;
+
+// An audience is either a sentinel string or a resolved cohort.
+// typeof audience === 'string' → sentinel (MeetingAudience.COMMUNITY or .PUBLIC)
+// typeof audience === 'object' → cohort (campName, cohortName, etc. available directly)
+export type MeetingAudience = 'COMMUNITY' | 'PUBLIC' | MeetingCohort;
+
+export type Meeting = {
+  meetingId: string;
+  title: string;
+  agenda: string | null;
+  joinUrl: string;
+  passcode: string | null;
+  startTime: string;           // UTC ISO 8601
+  durationMinutes: number;
+  meetingType: MeetingType;
+  source: MeetingSource;
+  providerMeetingId: string | null;  // Zoom series id (zoom_api source only)
+  occurrenceId: string | null;       // Zoom occurrence_id (recurring zoom_api meetings only)
+  recordingUrl: string | null;       // Zoom share_url — publicly accessible, no auth required
+  recordingPasscode: string | null;  // Zoom recording_play_passcode
+  audiences: MeetingAudience[];  // sentinels or resolved cohorts — never raw IDs on the read side
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type MeetingSlot = Pick<Meeting,
+  | 'meetingId'
+  | 'joinUrl'
+  | 'startTime'
+  | 'durationMinutes'
+  | 'title'
+  | 'agenda'
+  | 'meetingType'
+  | 'recordingUrl'
+  | 'recordingPasscode'
+>;
+
+export type PublicMeeting = Omit<
+  Meeting,
+  'joinUrl' | 'passcode' | 'source' | 'providerMeetingId' | 'occurrenceId' | 'createdAt' | 'updatedAt'
+> & {
+  joinUrl?: string;   // present only for PUBLIC meetings
+  passcode?: string;
+};
+
+/** A meeting scoped to a specific cohort — used in EnrolledCohort.meetings.
+ *  Cohort identity is implicit from the parent EnrolledCohort; not repeated here.
+ *  Aliased to MeetingSlot today; named separately to allow independent evolution. */
+export type CohortMeeting = MeetingSlot;
+
+// ─── Auth Types ─────────────────────────────────────────────────────────────
 
 export type AuthUser = {
   studentId: string;
@@ -357,7 +424,7 @@ export type AuthUser = {
   lastName: string;
   avatarUrl: string;
   oauthProvider: OAuthProvider;
-  role: StudentRole;
+  role: UserRole;
   settings?: UserSettings;
   /** Present only during ephemeral student impersonation. */
   impersonation?: {
@@ -378,49 +445,281 @@ export type MagicLinkValidation = {
   cohortSlug: string;
 };
 
-// ─── View / Response DTOs ─────────────────────────────────────────────────────
+// ─── Curriculum Types ────────────────────────────────────────────────────────
 
-export type AdminCohortDetail = {
-  cohort: Cohort;
-  units: Unit[];
-  enrollmentSummary: EnrollmentCounts;
+/** Unified student-facing page in a cohort curriculum.
+ *  Replaces StudentPage in new codepaths. firstVisitedAt is write-once (first visit);
+ *  lastVisitedAt tracks the most recent visit for toStudentProgress's lastPage. */
+export type CurriculumPage = PageSummary & {
+  unitId: string;
+  firstVisitedAt: string | null;
+  lastVisitedAt: string | null;
 };
 
-export type StudentCohortDetail = {
+/** Unified student-facing unit in a cohort curriculum.
+ *  Locked units are present as descriptors; their pages carry null visit timestamps. */
+export type CurriculumUnit = {
+  unitId: string;
+  title: string;
+  position: number;
+  isLocked: boolean;
+  description?: string;
+  pages: CurriculumPage[];
+};
+
+/** Canonical student-facing curriculum for a cohort.
+ *  The cohort sub-object is lean — carries only unitLabel and status beyond
+ *  standard identity fields (the two fields toStudentProgress requires). */
+export type CohortCurriculum = {
+  cohort: {
+    cohortSlug: string;
+    campName: string;
+    cohortName: string;
+    unitLabel: UnitLabel;
+    status: CohortStatus;
+  };
+  units: CurriculumUnit[];
+};
+
+/** Admin curriculum tree — all units with nested pages, including drafts.
+ *  Admin* justified: contains draft Page objects never visible on student surfaces. */
+export type AdminCurriculum = (Unit & { pages: Page[] })[];
+
+// ─── Progress Types ─────────────────────────────────────────────────────────
+
+/** Resolved navigation target embedded in StudentProgress.
+ *  Carries enough context for any surface to render a rich label
+ *  (e.g. "Session 4 · Web Basics") without a local curriculum lookup.
+ *  Constructed exclusively by toStudentProgress. */
+export type ResumeTarget = {
+  slug: string;
+  title: string;
+  unitTitle: string;
+  unitPosition: number;
+  unitLabel: string;
+  pagePosition: number;
+};
+
+/** Student progress snapshot for a single cohort enrollment.
+ *  Self-contained — every value a progress bar or CTA needs is here.
+ *  No external curriculum lookup required at call sites. */
+export type StudentProgress = {
+  // ─── State machine ────────────────────────────────────────────────────────
+  // not_started: enrolled, zero page views
+  // in_progress: some available pages visited, some remain
+  // caught_up:   all unlocked pages visited, locked units remain
+  // completed:   all unlocked pages visited, no locked units remain
+  status: ProgressStatus;
+
+  // ─── Navigation target ────────────────────────────────────────────────────
+  // The page a CTA should link to. Always navigable — never a locked page.
+  // NOT_STARTED  → first available page
+  // IN_PROGRESS  → first unvisited page (forward-scan, beginning fallback)
+  // CAUGHT_UP    → last visited available page
+  // COMPLETED    → null (router /learn/:cohortSlug resolves destination — see #725)
+  // Concluded camp → always null
+  resumeTarget: ResumeTarget | null;
+
+  // ─── Progress bar — self-contained, no curriculum prop needed ─────────────
+  pagesVisited: number;
+  pagesAvailable: number;   // drip-aware: unlocked published pages only
+  progressPct: number;      // Math.round(pagesVisited / pagesAvailable * 100)
+  dripPct: number;          // Math.round(unlockedUnits / totalUnits * 100) — bar track
+};
+
+/** Narrowed input for toStudentProgress — only the fields the function actually reads. */
+export type ProgressInput = {
+  cohort: { unitLabel: UnitLabel };
+  units: CurriculumUnit[];
+};
+
+/**
+ * Pure isomorphic mapper — builds StudentProgress from ProgressInput.
+ * No I/O; all inputs are pre-resolved by the caller.
+ *
+ * Status rules (evaluated in order):
+ *   not_started → zero page views
+ *   in_progress → some available pages unvisited
+ *   caught_up   → all available pages visited, locked units remain
+ *   completed   → all available pages visited, no locked units remain
+ *
+ * resumeTarget is always a navigable page — never a locked page.
+ * Concluded camps: resumeTarget is always null.
+ */
+export function toStudentProgress(
+  curriculum: ProgressInput,
+): StudentProgress {
+  const { cohort, units } = curriculum;
+
+  // Unit lookup by unitId
+  const unitById = new Map(units.map(u => [u.unitId, u]));
+
+  const allPages = units.flatMap(u => u.pages);
+
+  // Visited page IDs — firstVisitedAt is write-once (non-null = visited)
+  const visitedIds = new Set(
+    allPages.filter(p => p.firstVisitedAt !== null).map(p => p.pageId),
+  );
+
+  // Available pages — published pages in unlocked units only (drip-aware)
+  const availablePages = allPages.filter(p => !unitById.get(p.unitId)?.isLocked);
+
+  const pagesAvailable = availablePages.length;
+  const pagesVisited = availablePages.filter(p => visitedIds.has(p.pageId)).length;
+
+  // Status
+  const status: ProgressStatus =
+    pagesVisited === 0            ? ProgressStatus.NOT_STARTED :
+    pagesVisited < pagesAvailable ? ProgressStatus.IN_PROGRESS :
+    units.some(u => u.isLocked)   ? ProgressStatus.CAUGHT_UP   :
+                                    ProgressStatus.COMPLETED;
+
+  // Sort available pages by unit position then page position
+  const sortedAvailable = [...availablePages].sort((a, b) =>
+    (unitById.get(a.unitId)?.position ?? 0) - (unitById.get(b.unitId)?.position ?? 0) || a.position - b.position,
+  );
+
+  // Last visited available page — scoped to unlocked units so resumeTarget
+  // for CAUGHT_UP is always navigable.
+  const lastVisited = availablePages
+    .filter(p => p.lastVisitedAt !== null)
+    .reduce<CurriculumPage | null>(
+      (acc, p) => (!acc || p.lastVisitedAt! > acc.lastVisitedAt! ? p : acc),
+      null,
+    );
+
+  // Helper: build ResumeTarget from a CurriculumPage
+  function toProgressPage(page: CurriculumPage): ResumeTarget {
+    const unit = unitById.get(page.unitId);
+    return {
+      slug: page.slug,
+      title: page.title,
+      unitTitle: unit?.title ?? '',
+      unitPosition: unit?.position ?? 0,
+      unitLabel: cohort.unitLabel,
+      pagePosition: page.position,
+    };
+  }
+
+  // resumeTarget — single navigable destination for the CTA.
+  // Three cases only. The /learn/:cohortSlug router owns first-page resolution
+  // for COMPLETED and CONCLUDED — toResumeTarget returns null for those.
+  function toResumeTarget(): ResumeTarget | null {
+    if (status === ProgressStatus.COMPLETED) {
+      return null;
+    }
+    if (status === ProgressStatus.CAUGHT_UP) {
+      const last = sortedAvailable[sortedAvailable.length - 1];
+      return last ? toProgressPage(last) : null;
+    }
+    // NOT_STARTED + IN_PROGRESS unified: forward-scan from lastVisited,
+    // fall back to beginning (handles mid-sequence inserts and zero-visits case).
+    const lastIdx = lastVisited
+      ? sortedAvailable.findIndex(p => p.pageId === lastVisited.pageId)
+      : -1;
+    const next =
+      (lastIdx >= 0 ? sortedAvailable.slice(lastIdx + 1) : [])
+        .find(p => !visitedIds.has(p.pageId))
+      ?? sortedAvailable.find(p => !visitedIds.has(p.pageId))
+      ?? sortedAvailable[0];   // absorbs NOT_STARTED: all pages unvisited, return first
+    return next ? toProgressPage(next) : null;
+  }
+
+  return {
+    status,
+    resumeTarget: toResumeTarget(),
+    pagesVisited,
+    pagesAvailable,
+    progressPct: pagesAvailable > 0 ? Math.round(pagesVisited / pagesAvailable * 100) : 0,
+    dripPct: units.length > 0 ? Math.round(units.filter(u => !u.isLocked).length / units.length * 100) : 0,
+  };
+}
+
+// ─── Portal DTOs ─────────────────────────────────────────────────────────────
+
+/** A student's situated view of a cohort they are enrolled in.
+ *  Used as EnrolledCohort[] in PortalDashboard and as a single object
+ *  on the cohort landing page — same type, different cardinality. */
+export type EnrolledCohort = {
   cohort: Cohort;
-  roster: Pick<Student, 'firstName' | 'avatarUrl'>[];
   enrollment: Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt'>;
+  classmates: Pick<Student, 'firstName' | 'avatarUrl'>[];
+  meetings: CohortMeeting[];
   progress: StudentProgress;
 };
 
-export type MeetingCohort = Pick<Cohort,
-  | 'cohortSlug'
-  | 'campName'
-  | 'cohortName'
-  | 'status'
-  | 'startDate'
-  | 'endDate'
->;
-
-export type PublicMeeting = Omit<
-  Meeting,
-  'joinUrl' | 'passcode' | 'source' | 'providerMeetingId' | 'occurrenceId' | 'createdAt' | 'updatedAt'
-> & {
-  joinUrl?: string;   // present only for PUBLIC meetings
-  passcode?: string;
+/** Portal dashboard payload — GET /lms/students/me.
+ *  Cohort-scoped meetings are inside each EnrolledCohort.
+ *  communityMeetings carries COMMUNITY + PUBLIC audience meetings only. */
+export type PortalDashboard = {
+  enrollments: EnrolledCohort[];
+  communityMeetings: MeetingSlot[];
 };
 
-export type MeetingSlot = Pick<Meeting,
-  | 'meetingId'
-  | 'joinUrl'
-  | 'startTime'
-  | 'durationMinutes'
-  | 'title'
-  | 'agenda'
-  | 'meetingType'
-  | 'recordingUrl'
-  | 'recordingPasscode'
->;
+// ─── Admin DTOs ──────────────────────────────────────────────────────────────
+
+/** One enrolled student's row in the admin cohort roster. */
+export type CohortMember = {
+  enrollment: AdminEnrollment;
+  progress: StudentProgress;
+};
+
+/** Admin operational view of a cohort — GET /lms/admin/cohorts/:slug. */
+export type AdminCohortView = {
+  cohort: Cohort;
+  units: AdminCurriculum;
+  roster: CohortMember[];
+};
+
+/** Student record with full enrollment history across all cohorts. */
+export type AdminStudent = Student & {
+  enrollments: AdminEnrollment[];
+};
+
+/** Response from GET /lms/admin/learn/:cohortSlug/:pageSlug — admin preview context.
+ *  Carries the full curriculum tree for the preview shell sidebar. */
+export type AdminPreview = {
+  page: Page & { mdxContent: string; video?: PageVideo };
+  unit: {
+    unitId:   string;
+    title:    string;
+    position: number;
+    isLocked: boolean;
+    pages:    PageSummary[];
+  };
+  cohort: {
+    cohortSlug: string;
+    campName:   string;
+    cohortName: string;
+  };
+  curriculum: {
+    unitId:   string;
+    title:    string;
+    position: number;
+    isLocked: boolean;
+    pages:    PageSummary[];
+  }[];
+  resolvedMedia?: Record<string, ResolvedMedia | null>;
+};
+
+export type PageSource = Page & {
+  mdxContent: string;
+  /** Raw videoSource map for the editor — present when layout === 'video'. */
+  videoSource?: VideoSource;
+  /** Cohort display strings for breadcrumb rendering — eliminates second fetch on page editor. */
+  cohort: Pick<Cohort, 'campName' | 'cohortName'>;
+};
+
+/** Slim response for student article body. Used on the student learn path.
+ *  The learn chrome gets curriculum/unit metadata from the TQ cache, not this payload. */
+export type PageContent = {
+  page: { pageId: string; slug: string; title: string; layout: PageLayout; video?: PageVideo; mdxContent: string };
+  unit: Pick<Unit, 'unitId' | 'title' | 'position'>;
+  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
+  resolvedMedia?: Record<string, ResolvedMedia | null>;
+};
+
+// ─── Meeting Mutations ───────────────────────────────────────────────────────
 
 export type CreateMeetingInput = {
   title: string;
@@ -449,166 +748,6 @@ export type CreateRecurringMeetingResponse = {
   seriesId: string;        // providerMeetingId shared across all occurrences
 };
 
-export type DashboardEnrollment = {
-  enrollmentId: Enrollment['enrollmentId'];
-  cohort: Pick<
-    Cohort,
-    'cohortSlug' | 'campName' | 'cohortName' | 'startDate' | 'endDate' | 'image' | 'status' | 'unitLabel'
-  > & {
-    totalUnits: number;
-    unlockedUnits: number;
-  };
-};
-
-/** Meeting enriched with cohort context — used on the student dashboard. */
-export type DashboardMeeting = Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'> & MeetingSlot;
-
-export type StudentDashboard = {
-  student: Pick<Student, 'studentId' | 'firstName' | 'lastName' | 'avatarUrl' | 'email'>;
-  enrollments: DashboardEnrollment[];
-  meetings: DashboardMeeting[];
-};
-
-/** Navigation-ready page descriptor. Used in admin and student contexts.
- *  Base type extended by StudentPage for student-specific visit state.
- *  Replaces the retired PageTOCItem — named for what it models, not the UI widget that displays it. */
-export type PageSummary = {
-  pageId:    string;
-  slug:      string;
-  title:     string;
-  position:  number;
-  status:    PageStatus;
-  layout:    PageLayout;
-  video?:    PageVideoSummary;
-};
-
-/** A page from a student's perspective — extends PageSummary with personal visit state.
- *  visitedAt: null = unlocked but unvisited. ISO 8601 string = timestamp of first visit.
- *  Used in AdminPreviewPage when fetched in admin preview context.
- *  Never present in student contexts — students use StudentCohortPage with firstVisitedAt/lastVisitedAt. */
-export type StudentPage = PageSummary & {
-  visitedAt: string | null;
-};
-
-/** Unified student-facing page in a cohort curriculum.
- *  Replaces StudentPage in new codepaths. firstVisitedAt is write-once (first visit);
- *  lastVisitedAt tracks the most recent visit for toStudentProgress's lastPage. */
-export type StudentCohortPage = PageSummary & {
-  unitId: string;
-  firstVisitedAt: string | null;
-  lastVisitedAt: string | null;
-};
-
-/** Unified student-facing unit in a cohort curriculum.
- *  Locked units are present as descriptors; their pages carry null visit timestamps. */
-export type StudentCohortUnit = {
-  unitId: string;
-  title: string;
-  position: number;
-  isLocked: boolean;
-  description?: string;
-  pageCount: number;
-  pages: StudentCohortPage[];
-};
-
-/** Canonical student-facing curriculum for a cohort.
- *  The cohort sub-object is lean — carries only unitLabel and status beyond
- *  standard identity fields (the two fields toStudentProgress requires). */
-export type StudentCohortCurriculum = {
-  cohort: {
-    cohortSlug: string;
-    campName: string;
-    cohortName: string;
-    unitLabel: UnitLabel;
-    status: CohortStatus;
-  };
-  units: StudentCohortUnit[];
-};
-
-/** Response from GET /lms/admin/learn/:cohortSlug/:pageSlug — admin preview context.
- *  Carries the full curriculum tree for the preview shell sidebar. */
-export type AdminPreviewPage = {
-  page: Page & { mdxContent: string; video?: PageVideo };
-  unit: {
-    unitId:   string;
-    title:    string;
-    position: number;
-    isLocked: boolean;
-    pages:    StudentPage[];
-  };
-  cohort: {
-    cohortSlug: string;
-    campName:   string;
-    cohortName: string;
-  };
-  curriculum: {
-    unitId:   string;
-    title:    string;
-    position: number;
-    isLocked: boolean;
-    pages:    StudentPage[];
-  }[];
-  resolvedMedia?: Record<string, ResolvedMedia | null>;
-};
-
-/** Slim response for student article body. Used on the student learn path.
- *  The learn chrome gets curriculum/unit metadata from the TQ cache, not this payload. */
-export type LearnPageContent = {
-  page: { pageId: string; slug: string; title: string; layout: PageLayout; video?: PageVideo; mdxContent: string };
-  unit: Pick<Unit, 'unitId' | 'title' | 'position'>;
-  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
-  resolvedMedia?: Record<string, ResolvedMedia | null>;
-};
-
-/** Admin curriculum tree — all units with their pages nested, including drafts. */
-export type AdminCurriculum = {
-  units: (Unit & { pages: Page[] })[];
-};
-
-/** POST /lms/admin/enrollments — enrollment + onboarding signal. */
-export type AdminEnrollmentCreateResponse = {
-  enrollment: AdminEnrollment;
-  onboardingMode: OnboardingMode;
-  tokenSent: boolean;
-  emailError?: string;
-};
-
-/** DELETE /lms/admin/cohorts/:cohortId/units/:unitId — includes cascade counts. */
-export type AdminUnitDeleteResponse = {
-  success: true;
-  deletedPageCount: number;
-};
-
-/** Student record with full enrollment history across all cohorts. */
-export type AdminStudentDetail = Student & {
-  enrollments: AdminEnrollment[];
-};
-
-export type AdminPresignResult = {
-  presignedUrl: string;
-  s3Key: string;
-  mediaId: string;
-};
-
-export type AdminMediaConfirmInput = {
-  mediaId: string;
-  s3Key: string;
-  filename: string;
-  mimeType: string;
-  sizeBytes: number;
-  poster?: MediaPoster;
-};
-
-export type AdminMediaSignResult = Record<string, ResolvedMedia | null>;
-
-/** PATCH /lms/admin/media/:mediaId — updatable metadata fields. */
-export type UpdateMediaInput = {
-  title?: string;
-  alt?: string;
-};
-
-// ─── Meeting Query Types ─────────────────────────────────────────────────────
-
 /** Query parameters for GET /lms/admin/meetings */
 export type MeetingListParams = {
   from?:       string;  // UTC ISO 8601 — start of date window (inclusive)
@@ -618,19 +757,53 @@ export type MeetingListParams = {
 
 // ─── Admin page editor ────────────────────────────────────────────────────────
 
-export type AdminPageDetail = Page & {
-  mdxContent: string;
-  /** Raw videoSource map for the editor — present when layout === 'video'. */
-  videoSource?: VideoSource;
+export type RemoveAudienceResponse = {
+  deleted: boolean; // true if the meeting was cascade-deleted (last audience removed), false if only unassigned
 };
 
-// ─── Settings types ──────────────────────────────────────────────────────────
+// ─── Engagement ─────────────────────────────────────────────────────────────
 
-/** Fields any authenticated user can read via GET /lms/students/me/settings */
-export type UserSettings = {
-  openRouterKey?: string;
-  theme?: UserTheme;
+/** One page view record — returned as part of CohortEngagement bulk response. */
+export type PageView = {
+  studentId: string;
+  pageId: string;
+  firstVisitedAt: string;  // UTC ISO 8601 — first time student navigated to this page
+  lastVisitedAt: string;   // UTC ISO 8601 — most recent visit
+  visitCount: number;      // total number of visits (incremented on each page mount)
 };
+
+/** Response from GET /lms/admin/cohorts/:cohortSlug/engagement */
+export type CohortEngagement = {
+  cohortSlug: string;
+  views: PageView[];  // all view records for all students in this cohort
+};
+
+// ─── Media Operations ────────────────────────────────────────────────────────
+
+export type PresignResult = {
+  presignedUrl: string;
+  s3Key: string;
+  mediaId: string;
+};
+
+export type MediaConfirmInput = {
+  mediaId: string;
+  s3Key: string;
+  filename: string;
+  mimeType: string;
+  sizeBytes: number;
+  poster?: MediaPoster;
+};
+
+export type MediaSignResult = Record<string, ResolvedMedia | null>;
+
+/** PATCH /lms/admin/media/:mediaId — updatable metadata fields. */
+export type UpdateMediaInput = {
+  title?: string;
+  alt?: string;
+};
+
+// ─── Settings ────────────────────────────────────────────────────────────────
 
 /** Fields only the admin endpoint returns */
 export type AdminOnlySettings = {
@@ -642,6 +815,8 @@ export type AdminOnlySettings = {
 
 /** Full map — what GET /lms/admin/settings returns */
 export type AdminSettings = UserSettings & AdminOnlySettings;
+
+// ─── OpenRouter ──────────────────────────────────────────────────────────────
 
 /**
  * Complete AI API key metadata — SDK-verified against OpenRouter GetKeyData.
@@ -700,170 +875,18 @@ export type OpenRouterModelOption = {
   name: string;
 };
 
-// ─── Audience removal result ──────────────────────────────────────────────────
+// ─── Misc Responses ─────────────────────────────────────────────────────────
 
-export type RemoveAudienceResponse = {
-  deleted: boolean; // true if the meeting was cascade-deleted (last audience removed), false if only unassigned
+/** DELETE /lms/admin/cohorts/:cohortId/units/:unitId — includes cascade counts. */
+export type UnitDeleteResponse = {
+  success: true;
+  deletedPageCount: number;
 };
 
-// ─── Engagement tracking ──────────────────────────────────────────────────
-
-/** One page view record — returned as part of CohortEngagement bulk response. */
-export type PageViewSummary = {
-  studentId: string;
-  pageId: string;
-  firstVisitedAt: string;  // UTC ISO 8601 — first time student navigated to this page
-  lastVisitedAt: string;   // UTC ISO 8601 — most recent visit
-  visitCount: number;      // total number of visits (incremented on each page mount)
+/** POST /lms/admin/enrollments — enrollment + onboarding signal. */
+export type AdminEnrollmentCreateResponse = {
+  enrollment: AdminEnrollment;
+  onboardingMode: OnboardingMode;
+  tokenSent: boolean;
+  emailError?: string;
 };
-
-/** Response from GET /lms/admin/cohorts/:cohortSlug/engagement */
-export type CohortEngagement = {
-  cohortSlug: string;
-  views: PageViewSummary[];  // all view records for all students in this cohort
-};
-
-/** Resolved navigation target embedded in StudentProgress.
- *  Carries enough context for any surface to render a rich label
- *  (e.g. "Session 4 · Web Basics") without a local curriculum lookup.
- *  Constructed exclusively by toStudentProgress. */
-export type StudentProgressPage = {
-  slug: string;
-  title: string;
-  unitTitle: string;
-  unitPosition: number;
-  unitLabel: string;
-  pagePosition: number;
-};
-
-/** Student progress snapshot for a single cohort enrollment.
- *  Self-contained — every value a progress bar or CTA needs is here.
- *  No external curriculum lookup required at call sites. */
-export type StudentProgress = {
-  // ─── State machine ────────────────────────────────────────────────────────
-  // not_started: enrolled, zero page views
-  // in_progress: some available pages visited, some remain
-  // caught_up:   all unlocked pages visited, locked units remain
-  // completed:   all unlocked pages visited, no locked units remain
-  status: ProgressStatus;
-
-  // ─── Navigation target ────────────────────────────────────────────────────
-  // The page a CTA should link to. Always navigable — never a locked page.
-  // NOT_STARTED  → first available page
-  // IN_PROGRESS  → first unvisited page (forward-scan, beginning fallback)
-  // CAUGHT_UP    → last visited available page
-  // COMPLETED    → null (router /learn/:cohortSlug resolves destination — see #725)
-  // Concluded camp → always null
-  resumeTarget: StudentProgressPage | null;
-
-  // ─── Progress bar — self-contained, no curriculum prop needed ─────────────
-  pagesVisited: number;
-  pagesAvailable: number;   // drip-aware: unlocked published pages only
-  progressPct: number;      // Math.round(pagesVisited / pagesAvailable * 100)
-  dripPct: number;          // Math.round(unlockedUnits / totalUnits * 100) — bar track
-};
-
-
-// ─── Progress computation ─────────────────────────────────────────────────────
-
-/**
- * Pure isomorphic mapper — builds StudentProgress from StudentCohortCurriculum.
- * No I/O; all inputs are pre-resolved by the caller.
- *
- * Status rules (evaluated in order):
- *   not_started → zero page views
- *   in_progress → some available pages unvisited
- *   caught_up   → all available pages visited, locked units remain
- *   completed   → all available pages visited, no locked units remain
- *
- * resumeTarget is always a navigable page — never a locked page.
- * Concluded camps: resumeTarget is always null.
- */
-export function toStudentProgress(
-  curriculum: StudentCohortCurriculum,
-): StudentProgress {
-  const { cohort, units } = curriculum;
-
-  // Unit lookup by unitId
-  const unitById = new Map(units.map(u => [u.unitId, u]));
-
-  const allPages = units.flatMap(u => u.pages);
-
-  // Visited page IDs — firstVisitedAt is write-once (non-null = visited)
-  const visitedIds = new Set(
-    allPages.filter(p => p.firstVisitedAt !== null).map(p => p.pageId),
-  );
-
-  // Available pages — published pages in unlocked units only (drip-aware)
-  const availablePages = allPages.filter(p => !unitById.get(p.unitId)?.isLocked);
-
-  const pagesAvailable = availablePages.length;
-  const pagesVisited = availablePages.filter(p => visitedIds.has(p.pageId)).length;
-
-  // Status
-  const status: ProgressStatus =
-    pagesVisited === 0            ? ProgressStatus.NOT_STARTED :
-    pagesVisited < pagesAvailable ? ProgressStatus.IN_PROGRESS :
-    units.some(u => u.isLocked)   ? ProgressStatus.CAUGHT_UP   :
-                                    ProgressStatus.COMPLETED;
-
-  // Sort available pages by unit position then page position
-  const sortedAvailable = [...availablePages].sort((a, b) =>
-    (unitById.get(a.unitId)?.position ?? 0) - (unitById.get(b.unitId)?.position ?? 0) || a.position - b.position,
-  );
-
-  // Last visited available page — scoped to unlocked units so resumeTarget
-  // for CAUGHT_UP is always navigable.
-  const lastVisited = availablePages
-    .filter(p => p.lastVisitedAt !== null)
-    .reduce<StudentCohortPage | null>(
-      (acc, p) => (!acc || p.lastVisitedAt! > acc.lastVisitedAt! ? p : acc),
-      null,
-    );
-
-  // Helper: build StudentProgressPage from a StudentCohortPage
-  function toProgressPage(page: StudentCohortPage): StudentProgressPage {
-    const unit = unitById.get(page.unitId);
-    return {
-      slug: page.slug,
-      title: page.title,
-      unitTitle: unit?.title ?? '',
-      unitPosition: unit?.position ?? 0,
-      unitLabel: cohort.unitLabel,
-      pagePosition: page.position,
-    };
-  }
-
-  // resumeTarget — single navigable destination for the CTA.
-  // Three cases only. The /learn/:cohortSlug router owns first-page resolution
-  // for COMPLETED and CONCLUDED — toResumeTarget returns null for those.
-  function toResumeTarget(): StudentProgressPage | null {
-    if (status === ProgressStatus.COMPLETED) {
-      return null;
-    }
-    if (status === ProgressStatus.CAUGHT_UP) {
-      const last = sortedAvailable[sortedAvailable.length - 1];
-      return last ? toProgressPage(last) : null;
-    }
-    // NOT_STARTED + IN_PROGRESS unified: forward-scan from lastVisited,
-    // fall back to beginning (handles mid-sequence inserts and zero-visits case).
-    const lastIdx = lastVisited
-      ? sortedAvailable.findIndex(p => p.pageId === lastVisited.pageId)
-      : -1;
-    const next =
-      (lastIdx >= 0 ? sortedAvailable.slice(lastIdx + 1) : [])
-        .find(p => !visitedIds.has(p.pageId))
-      ?? sortedAvailable.find(p => !visitedIds.has(p.pageId))
-      ?? sortedAvailable[0];   // absorbs NOT_STARTED: all pages unvisited, return first
-    return next ? toProgressPage(next) : null;
-  }
-
-  return {
-    status,
-    resumeTarget: toResumeTarget(),
-    pagesVisited,
-    pagesAvailable,
-    progressPct: pagesAvailable > 0 ? Math.round(pagesVisited / pagesAvailable * 100) : 0,
-    dripPct: units.length > 0 ? Math.round(units.filter(u => !u.isLocked).length / units.length * 100) : 0,
-  };
-}
