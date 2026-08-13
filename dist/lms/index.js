@@ -1,19 +1,54 @@
 "use strict";
 // packages/api-contract/src/lms/index.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.StudentRole = exports.MediaKind = exports.UserTheme = exports.StudentStatus = exports.PageLayout = exports.PageStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.ProgressStatus = exports.EnrollmentStatus = exports.VideoSourceType = exports.CohortStatus = exports.OpenRouterKeyLimitReset = void 0;
+exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
 exports.toStudentProgress = toStudentProgress;
-// ─── Enums / Union Types ──────────────────────────────────────────────────────
-exports.OpenRouterKeyLimitReset = {
-    NONE: 'none',
-    DAILY: 'daily',
-    WEEKLY: 'weekly',
-    MONTHLY: 'monthly',
+// ─── Enums & Constants ───────────────────────────────────────────────────────
+exports.UserRole = {
+    STUDENT: 'student',
+    ADMIN: 'admin',
+};
+exports.StudentStatus = {
+    ACTIVE: 'active',
+    SUSPENDED: 'suspended',
+};
+exports.UserTheme = {
+    LIGHT: 'light',
+    DARK: 'dark',
+    SYSTEM: 'system',
 };
 exports.CohortStatus = {
     DRAFT: 'draft',
     ACTIVE: 'active',
     CONCLUDED: 'concluded',
+};
+exports.CohortFormat = {
+    FLEX: 'flex',
+    BOOT: 'boot',
+    SELF_PACED: 'self-paced',
+};
+/** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
+exports.SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+exports.UnitLabel = {
+    SESSION: 'Session',
+    WEEK: 'Week',
+    MODULE: 'Module',
+    DAY: 'Day',
+    PART: 'Part',
+    UNIT: 'Unit',
+};
+exports.EnrollmentStatus = {
+    PENDING_ONBOARDING: 'pending_onboarding',
+    ACTIVE: 'active',
+    REMOVED: 'removed',
+};
+exports.PageStatus = {
+    DRAFT: 'draft',
+    PUBLISHED: 'published',
+};
+exports.PageLayout = {
+    DOC: 'doc',
+    VIDEO: 'video',
 };
 exports.VideoSourceType = {
     EXTERNAL: 'external',
@@ -21,18 +56,11 @@ exports.VideoSourceType = {
     LOOM: 'loom',
     YOUTUBE: 'youtube',
 };
-exports.EnrollmentStatus = {
-    PENDING_ONBOARDING: 'pending_onboarding',
-    ACTIVE: 'active',
-    REMOVED: 'removed',
+exports.MediaKind = {
+    VIDEO: 'video',
+    IMAGE: 'image',
+    FILE: 'file',
 };
-exports.ProgressStatus = {
-    NOT_STARTED: 'not_started',
-    IN_PROGRESS: 'in_progress',
-    CAUGHT_UP: 'caught_up',
-    COMPLETED: 'completed',
-};
-// ─── Meeting Types ────────────────────────────────────────────────────────────
 exports.MeetingType = {
     CLASS: 'class', // scheduled instructional session
     FLEX: 'flex', // flexible/async CLASS variant — student can attend any occurrence covering same material
@@ -56,51 +84,20 @@ exports.MeetingAudience = {
     COMMUNITY: 'COMMUNITY', // LMS-wide — all verified members; joinUrl in portal only, never public
     PUBLIC: 'PUBLIC', // open to anyone — joinUrl exposed on public marketing site
 };
-// ─── Promoted Enum Objects ────────────────────────────────────────────────────
-exports.CohortFormat = {
-    FLEX: 'flex',
-    BOOT: 'boot',
-    SELF_PACED: 'self-paced',
+exports.ProgressStatus = {
+    NOT_STARTED: 'not_started',
+    IN_PROGRESS: 'in_progress',
+    CAUGHT_UP: 'caught_up',
+    COMPLETED: 'completed',
 };
-/** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
-exports.SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-exports.UnitLabel = {
-    SESSION: 'Session',
-    WEEK: 'Week',
-    MODULE: 'Module',
-    DAY: 'Day',
-    PART: 'Part',
-    UNIT: 'Unit',
+exports.OpenRouterKeyLimitReset = {
+    NONE: 'none',
+    DAILY: 'daily',
+    WEEKLY: 'weekly',
+    MONTHLY: 'monthly',
 };
-exports.PageStatus = {
-    DRAFT: 'draft',
-    PUBLISHED: 'published',
-};
-exports.PageLayout = {
-    DOC: 'doc',
-    VIDEO: 'video',
-};
-exports.StudentStatus = {
-    ACTIVE: 'active',
-    SUSPENDED: 'suspended',
-};
-exports.UserTheme = {
-    LIGHT: 'light',
-    DARK: 'dark',
-    SYSTEM: 'system',
-};
-exports.MediaKind = {
-    VIDEO: 'video',
-    IMAGE: 'image',
-    FILE: 'file',
-};
-exports.StudentRole = {
-    STUDENT: 'student',
-    ADMIN: 'admin',
-};
-// ─── Progress computation ─────────────────────────────────────────────────────
 /**
- * Pure isomorphic mapper — builds StudentProgress from StudentCohortCurriculum.
+ * Pure isomorphic mapper — builds StudentProgress from ProgressInput.
  * No I/O; all inputs are pre-resolved by the caller.
  *
  * Status rules (evaluated in order):
@@ -135,7 +132,7 @@ function toStudentProgress(curriculum) {
     const lastVisited = availablePages
         .filter(p => p.lastVisitedAt !== null)
         .reduce((acc, p) => (!acc || p.lastVisitedAt > acc.lastVisitedAt ? p : acc), null);
-    // Helper: build StudentProgressPage from a StudentCohortPage
+    // Helper: build ResumeTarget from a CurriculumPage
     function toProgressPage(page) {
         const unit = unitById.get(page.unitId);
         return {

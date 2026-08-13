@@ -196,7 +196,7 @@ export type Student = {
 
 export type EnrollmentCounts = {
   active: number;
-  pending_onboarding: number;
+  pendingOnboarding: number;
   removed: number;
   total: number;
 };
@@ -471,13 +471,7 @@ export type CurriculumUnit = {
  *  The cohort sub-object is lean — carries only unitLabel and status beyond
  *  standard identity fields (the two fields toStudentProgress requires). */
 export type CohortCurriculum = {
-  cohort: {
-    cohortSlug: string;
-    campName: string;
-    cohortName: string;
-    unitLabel: UnitLabel;
-    status: CohortStatus;
-  };
+  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'unitLabel' | 'status'>;
   units: CurriculumUnit[];
 };
 
@@ -697,7 +691,7 @@ export type PageSource = Page & {
 /** Slim response for student article body. Used on the student learn path.
  *  The learn chrome gets curriculum/unit metadata from the TQ cache, not this payload. */
 export type PageContent = {
-  page: { pageId: string; slug: string; title: string; layout: PageLayout; video?: PageVideo; mdxContent: string };
+  page: Pick<Page, 'pageId' | 'slug' | 'title' | 'layout'> & { video?: PageVideo; mdxContent: string };
   unit: Pick<Unit, 'unitId' | 'title' | 'position'>;
   cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
   resolvedMedia?: Record<string, ResolvedMedia | null>;
