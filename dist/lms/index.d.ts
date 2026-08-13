@@ -196,15 +196,7 @@ export type Cohort = {
 };
 /** Lean cohort row for list endpoints — carries pre-aggregated counts that are
  *  efficient to compute at list-query time but do not belong on the entity. */
-export type CohortSummary = {
-    cohortSlug: string;
-    campName: string;
-    cohortName: string;
-    format: CohortFormat;
-    unitLabel: UnitLabel;
-    status: CohortStatus;
-    startDate: string;
-    endDate: string;
+export type CohortSummary = Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'format' | 'unitLabel' | 'status' | 'startDate' | 'endDate'> & {
     unitCount: number;
     enrollmentCounts: EnrollmentCounts;
 };
@@ -255,21 +247,9 @@ export type PageVideo = {
     filename?: string;
     title?: string;
 };
-/**
- * Lightweight video descriptor for list/TOC contexts where full URL resolution
- * is unnecessary. Only carries what the curriculum sidebar needs to render
- * the video badge (source icon + duration).
- */
-export type VideoMeta = {
-    sourceType: VideoSourceType;
-    duration?: number;
-};
-/** Navigation-ready page descriptor. Used in admin and student contexts.
- *  Replaces the retired PageTOCItem — named for what it models, not the UI widget that displays it.
- *  video is VideoMeta (not PageVideo) — only source type + duration needed for TOC/sidebar rendering. */
-export type PageSummary = Pick<Page, 'pageId' | 'slug' | 'title' | 'position' | 'status' | 'layout'> & {
-    video?: VideoMeta;
-};
+/** Lightweight video descriptor for list/TOC contexts — sourceType + duration only.
+ *  Full URL resolution is unnecessary for sidebar/badge rendering. */
+export type VideoMeta = Pick<PageVideo, 'sourceType' | 'duration'>;
 export type Page = {
     cohortSlug: string;
     slug: string;
@@ -283,6 +263,12 @@ export type Page = {
     createdAt: string;
     updatedAt: string;
     version: number;
+};
+/** Navigation-ready page descriptor. Used in admin and student contexts.
+ *  Replaces the retired PageTOCItem — named for what it models, not the UI widget that displays it.
+ *  video is VideoMeta (not PageVideo) — only source type + duration needed for TOC/sidebar rendering. */
+export type PageSummary = Pick<Page, 'pageId' | 'slug' | 'title' | 'position' | 'status' | 'layout'> & {
+    video?: VideoMeta;
 };
 export type MediaPoster = {
     s3Key: string;
