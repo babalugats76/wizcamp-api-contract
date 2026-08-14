@@ -2,6 +2,7 @@
 // packages/api-contract/src/lms/index.ts
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
+exports.isStudentProgress = isStudentProgress;
 exports.toStudentProgress = toStudentProgress;
 // ─── Enums & Constants ───────────────────────────────────────────────────────
 exports.UserRole = {
@@ -96,6 +97,9 @@ exports.OpenRouterKeyLimitReset = {
     WEEKLY: 'weekly',
     MONTHLY: 'monthly',
 };
+function isStudentProgress(p) {
+    return 'resumeTarget' in p;
+}
 /**
  * Pure isomorphic mapper — builds StudentProgress from ProgressInput.
  * No I/O; all inputs are pre-resolved by the caller.

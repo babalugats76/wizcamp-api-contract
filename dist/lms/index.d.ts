@@ -329,15 +329,14 @@ export type Meeting = {
     createdAt: string;
     updatedAt: string;
 };
-export type MeetingSlot = Pick<Meeting, 'meetingId' | 'joinUrl' | 'startTime' | 'durationMinutes' | 'title' | 'agenda' | 'meetingType' | 'recordingUrl' | 'recordingPasscode'>;
+export type MeetingSlot = Pick<Meeting, 'meetingId' | 'joinUrl' | 'startTime' | 'durationMinutes' | 'title' | 'agenda' | 'meetingType' | 'recordingUrl' | 'recordingPasscode'> & {
+    cohortSlug: string | null;
+    campName: string | null;
+};
 export type PublicMeeting = Omit<Meeting, 'joinUrl' | 'passcode' | 'source' | 'providerMeetingId' | 'occurrenceId' | 'createdAt' | 'updatedAt'> & {
     joinUrl?: string;
     passcode?: string;
 };
-/** A meeting scoped to a specific cohort — used in EnrolledCohort.meetings.
- *  Cohort identity is implicit from the parent EnrolledCohort; not repeated here.
- *  Aliased to MeetingSlot today; named separately to allow independent evolution. */
-export type CohortMeeting = MeetingSlot;
 export type AuthUser = {
     studentId: string;
     email: string;
@@ -395,6 +394,15 @@ export type CohortCurriculum = {
 export type AdminCurriculum = (Unit & {
     pages: Page[];
 })[];
+export type ProgressSummary = {
+    pagesVisited: number;
+    pagesAvailable: number;
+    progressPct: number;
+    unlockedUnits: number;
+    totalUnits: number;
+    dripPct: number;
+    status: ProgressStatus;
+};
 /** Resolved navigation target embedded in StudentProgress.
  *  Carries enough context for any surface to render a rich label
  *  (e.g. "Session 4 · Web Basics") without a local curriculum lookup.
@@ -418,6 +426,7 @@ export type StudentProgress = {
     progressPct: number;
     dripPct: number;
 };
+export declare function isStudentProgress(p: ProgressSummary | StudentProgress): p is StudentProgress;
 /** Narrowed input for toStudentProgress — only the fields the function actually reads. */
 export type ProgressInput = {
     cohort: {
@@ -440,26 +449,27 @@ export type ProgressInput = {
  */
 export declare function toStudentProgress(curriculum: ProgressInput): StudentProgress;
 /** A student's situated view of a cohort they are enrolled in.
- *  Used as EnrolledCohort[] in PortalDashboard and as a single object
- *  on the cohort landing page — same type, different cardinality. */
+ *  Dashboard populates progress: ProgressSummary — no classmates, no meetings.
+ *  Cohort landing populates progress: StudentProgress, classmates, meetings.
+ *  Consumers that need resumeTarget use isStudentProgress(progress) guard. */
 export type EnrolledCohort = {
     cohort: Cohort;
     enrollment: Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt'>;
-    classmates: Pick<Student, 'firstName' | 'avatarUrl'>[];
-    meetings: CohortMeeting[];
-    progress: StudentProgress;
+    progress: ProgressSummary | StudentProgress;
+    classmates?: Pick<Student, 'firstName' | 'avatarUrl'>[];
+    meetings?: MeetingSlot[];
 };
 /** Portal dashboard payload — GET /lms/students/me.
- *  Cohort-scoped meetings are inside each EnrolledCohort.
- *  communityMeetings carries COMMUNITY + PUBLIC audience meetings only. */
+ *  cohorts contains EnrolledCohort views — not raw enrollment records.
+ *  meetings is the full windowed meeting feed (cohort-scoped + community/public). */
 export type PortalDashboard = {
-    enrollments: EnrolledCohort[];
-    communityMeetings: MeetingSlot[];
+    cohorts: EnrolledCohort[];
+    meetings: MeetingSlot[];
 };
 /** One enrolled student's row in the admin cohort roster. */
 export type CohortMember = {
     enrollment: AdminEnrollment;
-    progress: StudentProgress;
+    progress: ProgressSummary;
 };
 /** Admin operational view of a cohort — GET /lms/admin/cohorts/:slug. */
 export type AdminCohortView = {
