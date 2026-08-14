@@ -397,7 +397,10 @@ export type MeetingSlot = Pick<Meeting,
   | 'meetingType'
   | 'recordingUrl'
   | 'recordingPasscode'
->;
+> & {
+  cohortSlug: string | null;  // null for COMMUNITY / PUBLIC audience meetings
+  campName:   string | null;  // null when cohortSlug is null
+};
 
 export type PublicMeeting = Omit<
   Meeting,
@@ -406,11 +409,6 @@ export type PublicMeeting = Omit<
   joinUrl?: string;   // present only for PUBLIC meetings
   passcode?: string;
 };
-
-/** A meeting scoped to a specific cohort — used in EnrolledCohort.meetings.
- *  Cohort identity is implicit from the parent EnrolledCohort; not repeated here.
- *  Aliased to MeetingSlot today; named separately to allow independent evolution. */
-export type CohortMeeting = MeetingSlot;
 
 // ─── Auth Types ─────────────────────────────────────────────────────────────
 
@@ -479,6 +477,16 @@ export type AdminCurriculum = (Unit & { pages: Page[] })[];
 
 // ─── Progress Types ─────────────────────────────────────────────────────────
 
+export type ProgressSummary = {
+  pagesVisited:   number;
+  pagesAvailable: number;
+  progressPct:    number;
+  unlockedUnits:  number;
+  totalUnits:     number;
+  dripPct:        number;
+  status:         ProgressStatus;
+};
+
 /** Resolved navigation target embedded in StudentProgress.
  *  Carries enough context for any surface to render a rich label
  *  (e.g. "Session 4 · Web Basics") without a local curriculum lookup.
@@ -518,6 +526,12 @@ export type StudentProgress = {
   progressPct: number;      // Math.round(pagesVisited / pagesAvailable * 100)
   dripPct: number;          // Math.round(unlockedUnits / totalUnits * 100) — bar track
 };
+
+export function isStudentProgress(
+  p: ProgressSummary | StudentProgress,
+): p is StudentProgress {
+  return 'resumeTarget' in p;
+}
 
 /** Narrowed input for toStudentProgress — only the fields the function actually reads. */
 export type ProgressInput = {
@@ -630,22 +644,23 @@ export function toStudentProgress(
 // ─── Portal DTOs ─────────────────────────────────────────────────────────────
 
 /** A student's situated view of a cohort they are enrolled in.
- *  Used as EnrolledCohort[] in PortalDashboard and as a single object
- *  on the cohort landing page — same type, different cardinality. */
+ *  Dashboard populates progress: ProgressSummary — no classmates, no meetings.
+ *  Cohort landing populates progress: StudentProgress, classmates, meetings.
+ *  Consumers that need resumeTarget use isStudentProgress(progress) guard. */
 export type EnrolledCohort = {
-  cohort: Cohort;
-  enrollment: Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt'>;
-  classmates: Pick<Student, 'firstName' | 'avatarUrl'>[];
-  meetings: CohortMeeting[];
-  progress: StudentProgress;
+  cohort:      Cohort;
+  enrollment:  Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt'>;
+  progress:    ProgressSummary | StudentProgress;
+  classmates?: Pick<Student, 'firstName' | 'avatarUrl'>[];
+  meetings?:   MeetingSlot[];
 };
 
 /** Portal dashboard payload — GET /lms/students/me.
- *  Cohort-scoped meetings are inside each EnrolledCohort.
- *  communityMeetings carries COMMUNITY + PUBLIC audience meetings only. */
+ *  cohorts contains EnrolledCohort views — not raw enrollment records.
+ *  meetings is the full windowed meeting feed (cohort-scoped + community/public). */
 export type PortalDashboard = {
-  enrollments: EnrolledCohort[];
-  communityMeetings: MeetingSlot[];
+  cohorts:  EnrolledCohort[];
+  meetings: MeetingSlot[];
 };
 
 // ─── Admin DTOs ──────────────────────────────────────────────────────────────
@@ -653,7 +668,7 @@ export type PortalDashboard = {
 /** One enrolled student's row in the admin cohort roster. */
 export type CohortMember = {
   enrollment: AdminEnrollment;
-  progress: StudentProgress;
+  progress:   ProgressSummary;
 };
 
 /** Admin operational view of a cohort — GET /lms/admin/cohorts/:slug. */
