@@ -6,7 +6,7 @@
  * Naming conventions:
  * - Core entities: bare name (Cohort, Unit, Page)
  * - Enums & constants: bare name (CohortStatus, EnrollmentStatus, SLUG_REGEX)
- * - Admin-privileged DTOs: Admin* prefix (AdminEnrollment, AdminCurriculum, AdminPreview, AdminStudent)
+ * - Admin-privileged DTOs: Admin* prefix (AdminCurriculum, AdminPreview, AdminStudent);
  * - Composed read DTOs: *View suffix (AdminCohortView, EnrolledCohort)
  * - HTTP response bodies: *Response suffix
  * - Internal operation results: *Result suffix
@@ -221,10 +221,13 @@ export type Unit = {
 export type Enrollment = {
     enrollmentId: string;
     cohortSlug: string;
+    campName: string;
+    cohortName: string;
     studentId: string | null;
-    contactEmail: string;
-    studentFirstName: string;
-    studentLastName: string;
+    firstName: string;
+    lastName: string;
+    email: string;
+    avatarUrl: string | null;
     parentEmail: string | null;
     status: EnrollmentStatus;
     externalOrderId: string | null;
@@ -233,16 +236,6 @@ export type Enrollment = {
     onboardedAt: string | null;
     removedAt: string | null;
     updatedAt: string;
-};
-/** Enrollment with joined cohort + student context (resolved by backend). */
-export type AdminEnrollment = Enrollment & {
-    campName: string;
-    cohortName: string;
-    firstName: string;
-    lastName: string;
-    avatarUrl: string | null;
-    /** OAuth-verified email from StudentEntity (present when student is bound). */
-    studentEmail: string | null;
 };
 export type PageVideo = {
     sourceType: VideoSourceType;
@@ -451,7 +444,7 @@ export declare function toStudentProgress(curriculum: ProgressInput): StudentPro
  *  Consumers that need resumeTarget use isStudentProgress(progress) guard. */
 export type EnrolledCohort = {
     cohort: Cohort;
-    enrollment: Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt'>;
+    enrollment: Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt' | 'cohortSlug'>;
     progress: ProgressSummary | StudentProgress;
     classmates?: Pick<Student, 'firstName' | 'avatarUrl'>[];
     meetings?: MeetingSlot[];
@@ -465,7 +458,7 @@ export type PortalDashboard = {
 };
 /** One enrolled student's row in the admin cohort roster. */
 export type CohortMember = {
-    enrollment: AdminEnrollment;
+    enrollment: Enrollment;
     progress: ProgressSummary;
 };
 /** Admin operational view of a cohort — GET /lms/admin/cohorts/:slug. */
@@ -476,7 +469,7 @@ export type AdminCohortView = {
 };
 /** Student record with full enrollment history across all cohorts. */
 export type AdminStudent = Student & {
-    enrollments: AdminEnrollment[];
+    enrollments: Enrollment[];
 };
 /** Response from GET /lms/admin/learn/:cohortSlug/:pageSlug — admin preview context.
  *  Carries the full curriculum tree for the preview shell sidebar. */
@@ -645,7 +638,7 @@ export type UnitDeleteResponse = {
 };
 /** POST /lms/admin/enrollments — enrollment + onboarding signal. */
 export type AdminEnrollmentCreateResponse = {
-    enrollment: AdminEnrollment;
+    enrollment: Enrollment;
     onboardingMode: OnboardingMode;
     tokenSent: boolean;
     emailError?: string;
