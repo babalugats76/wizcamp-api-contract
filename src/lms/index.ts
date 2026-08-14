@@ -501,16 +501,11 @@ export type ResumeTarget = {
 };
 
 /** Student progress snapshot for a single cohort enrollment.
- *  Self-contained — every value a progress bar or CTA needs is here.
+ *  Extends ProgressSummary with a computed navigation target — student-surface only.
+ *  resumeTarget is derived from the full curriculum walk; it has no meaning on
+ *  admin roster rows or any surface that doesn't need a CTA destination.
  *  No external curriculum lookup required at call sites. */
-export type StudentProgress = {
-  // ─── State machine ────────────────────────────────────────────────────────
-  // not_started: enrolled, zero page views
-  // in_progress: some available pages visited, some remain
-  // caught_up:   all unlocked pages visited, locked units remain
-  // completed:   all unlocked pages visited, no locked units remain
-  status: ProgressStatus;
-
+export type StudentProgress = ProgressSummary & {
   // ─── Navigation target ────────────────────────────────────────────────────
   // The page a CTA should link to. Always navigable — never a locked page.
   // NOT_STARTED  → first available page
@@ -519,12 +514,6 @@ export type StudentProgress = {
   // COMPLETED    → null (router /learn/:cohortSlug resolves destination — see #725)
   // Concluded camp → always null
   resumeTarget: ResumeTarget | null;
-
-  // ─── Progress bar — self-contained, no curriculum prop needed ─────────────
-  pagesVisited: number;
-  pagesAvailable: number;   // drip-aware: unlocked published pages only
-  progressPct: number;      // Math.round(pagesVisited / pagesAvailable * 100)
-  dripPct: number;          // Math.round(unlockedUnits / totalUnits * 100) — bar track
 };
 
 export function isStudentProgress(
@@ -631,13 +620,18 @@ export function toStudentProgress(
     return next ? toProgressPage(next) : null;
   }
 
+  const unlockedUnits = units.filter(u => !u.isLocked).length;
+  const totalUnits    = units.length;
+
   return {
     status,
     resumeTarget: toResumeTarget(),
     pagesVisited,
     pagesAvailable,
-    progressPct: pagesAvailable > 0 ? Math.round(pagesVisited / pagesAvailable * 100) : 0,
-    dripPct: units.length > 0 ? Math.round(units.filter(u => !u.isLocked).length / units.length * 100) : 0,
+    progressPct:   pagesAvailable > 0 ? Math.round(pagesVisited / pagesAvailable * 100) : 0,
+    unlockedUnits,
+    totalUnits,
+    dripPct:       totalUnits > 0 ? Math.round(unlockedUnits / totalUnits * 100) : 0,
   };
 }
 

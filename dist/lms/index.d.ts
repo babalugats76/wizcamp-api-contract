@@ -416,15 +416,12 @@ export type ResumeTarget = {
     pagePosition: number;
 };
 /** Student progress snapshot for a single cohort enrollment.
- *  Self-contained — every value a progress bar or CTA needs is here.
+ *  Extends ProgressSummary with a computed navigation target — student-surface only.
+ *  resumeTarget is derived from the full curriculum walk; it has no meaning on
+ *  admin roster rows or any surface that doesn't need a CTA destination.
  *  No external curriculum lookup required at call sites. */
-export type StudentProgress = {
-    status: ProgressStatus;
+export type StudentProgress = ProgressSummary & {
     resumeTarget: ResumeTarget | null;
-    pagesVisited: number;
-    pagesAvailable: number;
-    progressPct: number;
-    dripPct: number;
 };
 export declare function isStudentProgress(p: ProgressSummary | StudentProgress): p is StudentProgress;
 /** Narrowed input for toStudentProgress — only the fields the function actually reads. */

@@ -170,13 +170,17 @@ function toStudentProgress(curriculum) {
             ?? sortedAvailable[0]; // absorbs NOT_STARTED: all pages unvisited, return first
         return next ? toProgressPage(next) : null;
     }
+    const unlockedUnits = units.filter(u => !u.isLocked).length;
+    const totalUnits = units.length;
     return {
         status,
         resumeTarget: toResumeTarget(),
         pagesVisited,
         pagesAvailable,
         progressPct: pagesAvailable > 0 ? Math.round(pagesVisited / pagesAvailable * 100) : 0,
-        dripPct: units.length > 0 ? Math.round(units.filter(u => !u.isLocked).length / units.length * 100) : 0,
+        unlockedUnits,
+        totalUnits,
+        dripPct: totalUnits > 0 ? Math.round(unlockedUnits / totalUnits * 100) : 0,
     };
 }
 //# sourceMappingURL=index.js.map
