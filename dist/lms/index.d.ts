@@ -6,8 +6,7 @@
  * Naming conventions:
  * - Core entities: bare name (Cohort, Unit, Page)
  * - Enums & constants: bare name (CohortStatus, EnrollmentStatus, SLUG_REGEX)
- * - Admin-privileged DTOs: Admin* prefix (AdminCurriculum, AdminPreview, AdminStudent);
- * - Composed read DTOs: *View suffix (AdminCohortView, EnrolledCohort)
+ * - Composed read DTOs: *View suffix (CohortView, EnrolledCohort)
  * - HTTP response bodies: *Response suffix
  * - Internal operation results: *Result suffix
  * - Auth types: Auth* prefix (AuthUser)
@@ -384,7 +383,7 @@ export type CohortCurriculum = {
 };
 /** Admin curriculum tree — all units with nested pages, including drafts.
  *  Admin* justified: contains draft Page objects never visible on student surfaces. */
-export type AdminCurriculum = (Unit & {
+export type Curriculum = (Unit & {
     pages: Page[];
 })[];
 export type ProgressSummary = {
@@ -462,18 +461,18 @@ export type CohortMember = {
     progress: ProgressSummary;
 };
 /** Admin operational view of a cohort — GET /lms/admin/cohorts/:slug. */
-export type AdminCohortView = {
+export type CohortView = {
     cohort: Cohort;
-    units: AdminCurriculum;
+    units: Curriculum;
     roster: CohortMember[];
 };
 /** Student record with full enrollment history across all cohorts. */
-export type AdminStudent = Student & {
+export type StudentEnrollments = Student & {
     enrollments: Enrollment[];
 };
 /** Response from GET /lms/admin/learn/:cohortSlug/:pageSlug — admin preview context.
  *  Carries the full curriculum tree for the preview shell sidebar. */
-export type AdminPreview = {
+export type PagePreview = {
     page: Page & {
         mdxContent: string;
         video?: PageVideo;
