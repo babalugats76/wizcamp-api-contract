@@ -363,10 +363,10 @@ export type MeetingCohort = Pick<Cohort,
   | 'endDate'
 >;
 
-// An audience is either a sentinel string or a resolved cohort.
+// An audience is either a sentinel string (derived from the MeetingAudience const) or a resolved cohort.
 // typeof audience === 'string' → sentinel (MeetingAudience.COMMUNITY or .PUBLIC)
 // typeof audience === 'object' → cohort (campName, cohortName, etc. available directly)
-export type MeetingAudience = 'COMMUNITY' | 'PUBLIC' | MeetingCohort;
+export type MeetingAudience = typeof MeetingAudience[keyof typeof MeetingAudience] | MeetingCohort;
 
 export type Meeting = {
   meetingId: string;

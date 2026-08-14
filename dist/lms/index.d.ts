@@ -310,7 +310,7 @@ export type ResolvedMedia = Omit<Media, 's3Key' | 'poster' | 'createdAt'> & {
     posterUrl: string | null;
 };
 export type MeetingCohort = Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'status' | 'startDate' | 'endDate'>;
-export type MeetingAudience = 'COMMUNITY' | 'PUBLIC' | MeetingCohort;
+export type MeetingAudience = typeof MeetingAudience[keyof typeof MeetingAudience] | MeetingCohort;
 export type Meeting = {
     meetingId: string;
     title: string;
