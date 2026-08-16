@@ -8,7 +8,8 @@
  * Naming conventions:
  * - Core entities: bare name (Cohort, Unit, Page)
  * - Enums & constants: bare name (CohortStatus, EnrollmentStatus, SLUG_REGEX)
- * - Composed read DTOs: *View suffix (CohortView, EnrolledCohort)
+ * - Composed read DTOs: *View suffix (CohortView)
+ * - Flat compound join types: bare name (Enrollment — enrollment + cohort + student identity)
  * - HTTP response bodies: *Response suffix
  * - Internal operation results: *Result suffix
  * - Auth types: Auth* prefix (AuthUser)
@@ -251,9 +252,23 @@ export type Unit = {
   updatedAt: string;
 };
 
+/**
+ * Flat compound join type — enrollment row + cohort context + coalesced student identity.
+ * Student identity fields are load-bearing: pending_onboarding enrollments exist before
+ * a student row, so COALESCE(student.x, enrollment.x) is always required at the SQL seam.
+ */
 export type Enrollment = {
+  // ─── Enrollment identity ──────────────────────────────────────────────────
   enrollmentId: string;
   cohortSlug: string;
+  status: EnrollmentStatus;
+  externalOrderId: string | null;
+  externalPaymentId: string | null;
+  enrolledAt: string;
+  onboardedAt: string | null;
+  removedAt: string | null;
+  updatedAt: string;
+  // ─── Cohort context ───────────────────────────────────────────────────────
   campName: string;
   cohortName: string;
   unitLabel: UnitLabel;
@@ -265,19 +280,13 @@ export type Enrollment = {
   video: MediaVideo | null;
   level: CampLevel | null;
   cohortStatus: CohortStatus;
+  // ─── Student identity (coalesced) ─────────────────────────────────────────
   studentId: string | null;
   firstName: string;        // coalesced: student.firstName ?? enrollment.studentFirstName
   lastName: string;         // coalesced: student.lastName  ?? enrollment.studentLastName
   email: string;            // coalesced: student.email     ?? enrollment.contactEmail
   avatarUrl: string | null; // null until student claims enrollment via OAuth
   parentEmail: string | null;
-  status: EnrollmentStatus;
-  externalOrderId: string | null;
-  externalPaymentId: string | null;
-  enrolledAt: string;
-  onboardedAt: string | null;
-  removedAt: string | null;
-  updatedAt: string;
 };
 
 export type PageVideo = {
@@ -672,7 +681,12 @@ export type CohortView = {
   roster: CohortMember[];
 };
 
-/** Student record with full enrollment history across all cohorts. */
+/**
+ * Student record with full enrollment history across all cohorts.
+ * Admin-only — not used on student-facing surfaces.
+ * Each Enrollment carries denormalized student identity fields; the overlap with
+ * Student is a read-time artifact of the three-table join, not a design flaw.
+ */
 export type StudentEnrollments = Student & {
   enrollments: Enrollment[];
 };
