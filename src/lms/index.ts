@@ -256,6 +256,15 @@ export type Enrollment = {
   cohortSlug: string;
   campName: string;
   cohortName: string;
+  unitLabel: UnitLabel;
+  format: CohortFormat;
+  description: string | null;
+  startDate: string;
+  endDate: string;
+  image: MediaImage | null;
+  video: MediaVideo | null;
+  level: CampLevel | null;
+  cohortStatus: CohortStatus;
   studentId: string | null;
   firstName: string;        // coalesced: student.firstName ?? enrollment.studentFirstName
   lastName: string;         // coalesced: student.lastName  ?? enrollment.studentLastName
