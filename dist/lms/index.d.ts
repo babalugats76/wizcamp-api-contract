@@ -706,7 +706,7 @@ export type UnitDeleteResponse = {
     deletedPageCount: number;
 };
 /** POST /lms/admin/enrollments — enrollment + onboarding signal. */
-export type AdminEnrollmentCreateResponse = {
+export type EnrollmentCreateResponse = {
     enrollment: Enrollment;
     onboardingMode: OnboardingMode;
     tokenSent: boolean;
