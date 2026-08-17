@@ -8,7 +8,7 @@
  * Naming conventions:
  * - Core entities: bare name (Cohort, Unit, Page)
  * - Enums & constants: bare name (CohortStatus, EnrollmentStatus, SLUG_REGEX)
- * - Composed read DTOs: *View suffix (CohortView)
+ * - Composed read DTOs: *Detail suffix (CohortDetail) or descriptive noun (CohortRoster, StudentEngagement)
  * - Flat compound join types: bare name (Enrollment — enrollment + cohort + student identity)
  * - HTTP response bodies: *Response suffix
  * - Internal operation results: *Result suffix
@@ -203,7 +203,6 @@ export type EnrollmentCounts = {
 
 export type Cohort = {
   cohortSlug: string;  // stable slug — primary identity
-  cohortId?: string;   // coh_* ULID — legacy, may be absent
   campName: string;
   cohortName: string;
   format: CohortFormat;
@@ -472,9 +471,17 @@ export type CurriculumUnit = {
   pages:        CurriculumPage[];
 };
 
-/** Canonical student-facing curriculum for a cohort.
- *  The cohort sub-object is lean — carries only unitLabel and status beyond
- *  standard identity fields (the two fields toStudentProgress requires). */
+/**
+ * Student-facing curriculum tree — GET /lms/learn/:slug.
+ *
+ * Shared cache key (queryKeys.student.curriculum) for both the cohort landing
+ * page and the learn shell. page-view-tracker patches firstVisitedAt /
+ * lastVisitedAt optimistically on every page visit so TOC checkmarks and
+ * progress visuals stay live on both surfaces without a refetch.
+ *
+ * cohort sub-object carries only the fields toStudentProgress requires
+ * (unitLabel, status) plus standard identity.
+ */
 export type CohortCurriculum = {
   cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'unitLabel' | 'status'>;
   units: CurriculumUnit[];
@@ -524,12 +531,6 @@ export type StudentProgress = ProgressSummary & {
   // Concluded camp → always null
   resumeTarget: ResumeTarget | null;
 };
-
-export function isStudentProgress(
-  p: ProgressSummary | StudentProgress,
-): p is StudentProgress {
-  return 'resumeTarget' in p;
-}
 
 /** Narrowed input for toStudentProgress — only the fields the function actually reads. */
 export type ProgressInput = {
@@ -646,39 +647,67 @@ export function toStudentProgress(
 
 // ─── Portal DTOs ─────────────────────────────────────────────────────────────
 
-/** A student's situated view of a cohort they are enrolled in.
- *  Dashboard populates progress: ProgressSummary — no classmates, no meetings.
- *  Cohort landing populates progress: StudentProgress, classmates, meetings.
- *  Consumers that need resumeTarget use isStudentProgress(progress) guard. */
-export type EnrolledCohort = {
+/**
+ * Student cohort landing payload — GET /lms/students/me/cohorts/:slug.
+ *
+ * Hero band data: cohort identity, enrollment state, progress scalars,
+ * classmate strip, and schedule rail. Does NOT include the curriculum tree —
+ * that is fetched separately via GET /lms/learn/:slug → CohortCurriculum and
+ * cached under queryKeys.student.curriculum(cohortSlug). Both fetches fire in
+ * parallel in student.service.ts so page-view-tracker can patch the curriculum
+ * cache independently without invalidating this payload.
+ *
+ * progress: ProgressSummary scalars only — StudentProgress (resumeTarget) is
+ * derived client-side from CohortCurriculum via toStudentProgress.
+ * classmates: firstName + avatarUrl only — count and slice are client-side.
+ * meetings: cohort-scoped slots only — community/public come from the dashboard.
+ */
+export type CohortLanding = {
   cohort:      Cohort;
   enrollment:  Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt' | 'cohortSlug'>;
-  progress:    ProgressSummary | StudentProgress;
-  classmates?: Pick<Student, 'firstName' | 'avatarUrl'>[];
-  meetings?:   MeetingSlot[];
+  progress:    ProgressSummary;
+  classmates:  Pick<Student, 'firstName' | 'avatarUrl'>[];
+  meetings:    MeetingSlot[];
 };
 
-/** Portal dashboard payload — GET /lms/students/me.
- *  cohorts contains EnrolledCohort views — not raw enrollment records.
- *  meetings is the full windowed meeting feed (cohort-scoped + community/public). */
-export type PortalDashboard = {
-  cohorts:  EnrolledCohort[];
+/**
+ * Student dashboard payload — GET /lms/students/me.
+ *
+ * One card per enrolled cohort plus a windowed meeting feed. cohort is the
+ * full Cohort entity — no Pick needed. resumeTarget is not included; the CTA
+ * links to /learn/:cohortSlug and the learn router resolves the correct page
+ * server-side via toStudentProgress(CohortCurriculum).
+ */
+export type StudentDashboard = {
+  cohorts: ({
+    cohort:      Cohort;
+    enrollment:  Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt' | 'cohortSlug'>;
+    progress:    ProgressSummary;
+  })[];
   meetings: MeetingSlot[];
 };
 
 // ─── Admin DTOs ──────────────────────────────────────────────────────────────
 
-/** One enrolled student's row in the admin cohort roster. */
-export type CohortMember = {
-  enrollment: Enrollment;
-  progress:   ProgressSummary;
+/** Admin operational view of a cohort — GET /lms/admin/cohorts/:slug. */
+export type CohortDetail = {
+  cohort: Cohort;
+  unitCount: number;
+  enrollmentCounts: EnrollmentCounts;
 };
 
-/** Admin operational view of a cohort — GET /lms/admin/cohorts/:slug. */
-export type CohortView = {
-  cohort: Cohort;
-  units: Curriculum;
-  roster: CohortMember[];
+/**
+ * Admin cohort roster — GET /lms/admin/cohorts/:slug/roster.
+ *
+ * Unpaginated by design — cohort sizes are bounded and the full roster is
+ * needed to render the progress table and compute aggregate stats.
+ * Row shape is inline: Enrollment (full three-entity join) extended with
+ * server-computed progress scalars and last-active timestamp.
+ * lastActiveAt is null when the student has no page views.
+ */
+export type CohortRoster = {
+  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'unitLabel' | 'status'>;
+  roster: (Enrollment & { progress: ProgressSummary; lastActiveAt: string | null })[];
 };
 
 /**
@@ -762,19 +791,32 @@ export type RemoveAudienceResponse = {
 
 // ─── Engagement ─────────────────────────────────────────────────────────────
 
-/** One page view record — returned as part of CohortEngagement bulk response. */
-export type PageView = {
-  studentId: string;
-  pageId: string;
-  firstVisitedAt: string;  // UTC ISO 8601 — first time student navigated to this page
-  lastVisitedAt: string;   // UTC ISO 8601 — most recent visit
-  visitCount: number;      // total number of visits (incremented on each page mount)
+/**
+ * Per-page visit record for a single student — used in StudentEngagement.
+ * visitCount semantics: incremented at most once per 30-minute window per
+ * student+page combination. Represents distinct visit sessions, not raw mounts.
+ */
+export type PageViewDetail = {
+  pageId:         string;
+  firstVisitedAt: string;  // UTC ISO 8601 — write-once
+  lastVisitedAt:  string;  // UTC ISO 8601 — updated each session
+  visitCount:     number;
 };
 
-/** Response from GET /lms/admin/cohorts/:cohortSlug/engagement */
-export type CohortEngagement = {
-  cohortSlug: string;
-  views: PageView[];  // all view records for all students in this cohort
+/**
+ * Per-student engagement drill-down — GET /lms/admin/cohorts/:slug/students/:studentId/engagement.
+ *
+ * Fetched lazily when the ProgressSheet drawer opens for a specific student.
+ * progress mirrors the roster row scalar so the sheet header renders without
+ * a second query. pages is the full per-page breakdown for this student in
+ * this cohort only — no cross-cohort data.
+ */
+export type StudentEngagement = {
+  cohortSlug:   string;
+  studentId:    string;
+  progress:     ProgressSummary;
+  lastActiveAt: string | null;
+  pages:        PageViewDetail[];
 };
 
 // ─── Media Operations ────────────────────────────────────────────────────────
