@@ -710,18 +710,14 @@ export type CohortDetail = {
 };
 
 /**
- * Admin cohort roster — GET /lms/admin/cohorts/:slug/roster.
- *
+ * Response for GET /lms/admin/cohorts/:slug/roster.
  * Unpaginated by design — cohort sizes are bounded and the full roster is
  * needed to render the progress table and compute aggregate stats.
- * Row shape is inline: Enrollment (full three-entity join) extended with
- * server-computed progress scalars and last-active timestamp.
- * lastActiveAt is null when the student has no page views.
+ * Each row is a full Enrollment extended with server-computed progress scalars
+ * and last-active timestamp. lastActiveAt is null when the student has no page views.
+ * Cohort identity is not included — callers already have it from CohortDetail.
  */
-export type CohortRoster = {
-  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'unitLabel' | 'status'>;
-  roster: (Enrollment & { progress: ProgressSummary; lastActiveAt: string | null })[];
-};
+export type CohortRoster = (Enrollment & { progress: ProgressSummary; lastActiveAt: string | null })[];
 
 /**
  * Student record with full enrollment history across all cohorts.
