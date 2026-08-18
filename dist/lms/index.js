@@ -132,7 +132,7 @@ function toStudentProgress(curriculum) {
     const lastVisited = availablePages
         .filter(p => p.lastVisitedAt !== null)
         .reduce((acc, p) => (!acc || p.lastVisitedAt > acc.lastVisitedAt ? p : acc), null);
-    // Helper: build ResumeTarget from a CurriculumPage
+    // Helper: build ResumeTarget from a StudentCurriculumPage
     function toProgressPage(page) {
         const unit = unitById.get(page.unitId);
         return {

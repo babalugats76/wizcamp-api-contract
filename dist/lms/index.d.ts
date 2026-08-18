@@ -6,12 +6,16 @@
  * Naming conventions:
  * - Core entities: bare name (Cohort, Unit, Page)
  * - Enums & constants: bare name (CohortStatus, EnrollmentStatus, SLUG_REGEX)
- * - Composed read DTOs: *Detail suffix (CohortDetail) or descriptive noun (CohortRoster, StudentEngagement)
+ * - Cohort* prefix: authored source / admin view — no per-student state (CohortCurriculum, CohortDetail)
+ * - Student* prefix: per-student derived view — always carries enrollment or visit state
+ *     (StudentCurriculum, StudentCurriculumUnit, StudentCurriculumPage, StudentCohortLanding,
+ *      StudentPageContent, StudentProgress, StudentDashboard, StudentEngagement, StudentEnrollments)
+ * - *Summary suffix: lean nav descriptors, surface-neutral — shared by admin and student (PageSummary, UnitSummary, CohortSummary)
+ * - Composed read DTOs: *Detail suffix (CohortDetail) or descriptive noun (CohortRoster)
  * - Flat compound join types: bare name (Enrollment — enrollment + cohort + student identity)
  * - HTTP response bodies: *Response suffix
  * - Internal operation results: *Result suffix
  * - Auth types: Auth* prefix (AuthUser)
- * - List-endpoint DTOs: *Summary suffix (CohortSummary)
  */
 import type { MediaImage, MediaVideo, CampLevel } from '../common';
 import { CampLevelColor } from '../common';
@@ -293,6 +297,11 @@ export type PageSummary = {
     layout: PageLayout;
     video?: VideoMeta;
 };
+/** Lean unit nav descriptor — used in admin preview sidebar and PagePreview.curriculum.
+ *  Symmetric with PageSummary. Surface-neutral: shared by admin preview and student shells. */
+export type UnitSummary = Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked'> & {
+    pages: PageSummary[];
+};
 export type MediaPoster = {
     s3Key: string;
     sizeBytes: number;
@@ -372,7 +381,7 @@ export type MagicLinkValidation = {
 /** Unified student-facing page in a cohort curriculum.
  *  Replaces StudentPage in new codepaths. firstVisitedAt is write-once (first visit);
  *  lastVisitedAt tracks the most recent visit for toStudentProgress's lastPage. */
-export type CurriculumPage = PageSummary & {
+export type StudentCurriculumPage = PageSummary & {
     unitId: string;
     firstVisitedAt: string | null;
     lastVisitedAt: string | null;
@@ -380,13 +389,13 @@ export type CurriculumPage = PageSummary & {
 /** Unified student-facing unit in a cohort curriculum.
  *  Locked units are present as descriptors; their pages carry null visit timestamps.
  *  description is optional (vs Unit's string | null) — absent means not set, never rendered. */
-export type CurriculumUnit = {
+export type StudentCurriculumUnit = {
     unitId: string;
     title: string;
     position: number;
     isLocked: boolean;
     description?: string;
-    pages: CurriculumPage[];
+    pages: StudentCurriculumPage[];
 };
 /**
  * Student-facing curriculum tree — GET /lms/learn/:slug.
@@ -399,15 +408,10 @@ export type CurriculumUnit = {
  * cohort sub-object carries only the fields toStudentProgress requires
  * (unitLabel, status) plus standard identity.
  */
-export type CohortCurriculum = {
+export type StudentCurriculum = {
     cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'unitLabel' | 'status'>;
-    units: CurriculumUnit[];
+    units: StudentCurriculumUnit[];
 };
-/** Admin curriculum tree — all units with nested pages, including drafts.
- *  Admin* justified: contains draft Page objects never visible on student surfaces. */
-export type Curriculum = (Unit & {
-    pages: Page[];
-})[];
 export type ProgressSummary = {
     pagesVisited: number;
     pagesAvailable: number;
@@ -442,7 +446,7 @@ export type ProgressInput = {
     cohort: {
         unitLabel: UnitLabel;
     };
-    units: CurriculumUnit[];
+    units: StudentCurriculumUnit[];
 };
 /**
  * Pure isomorphic mapper — builds StudentProgress from ProgressInput.
@@ -463,17 +467,17 @@ export declare function toStudentProgress(curriculum: ProgressInput): StudentPro
  *
  * Hero band data: cohort identity, enrollment state, progress scalars,
  * classmate strip, and schedule rail. Does NOT include the curriculum tree —
- * that is fetched separately via GET /lms/learn/:slug → CohortCurriculum and
+ * that is fetched separately via GET /lms/learn/:slug → StudentCurriculum and
  * cached under queryKeys.student.curriculum(cohortSlug). Both fetches fire in
  * parallel in student.service.ts so page-view-tracker can patch the curriculum
  * cache independently without invalidating this payload.
  *
  * progress: ProgressSummary scalars only — StudentProgress (resumeTarget) is
- * derived client-side from CohortCurriculum via toStudentProgress.
+ * derived client-side from StudentCurriculum via toStudentProgress.
  * classmates: firstName + avatarUrl only — count and slice are client-side.
  * meetings: cohort-scoped slots only — community/public come from the dashboard.
  */
-export type CohortLanding = {
+export type StudentCohortLanding = {
     cohort: Cohort;
     enrollment: Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt' | 'cohortSlug'>;
     progress: ProgressSummary;
@@ -486,7 +490,7 @@ export type CohortLanding = {
  * One card per enrolled cohort plus a windowed meeting feed. cohort is the
  * full Cohort entity — no Pick needed. resumeTarget is not included; the CTA
  * links to /learn/:cohortSlug and the learn router resolves the correct page
- * server-side via toStudentProgress(CohortCurriculum).
+ * server-side via toStudentProgress(StudentCurriculum).
  */
 export type StudentDashboard = {
     cohorts: ({
@@ -496,6 +500,12 @@ export type StudentDashboard = {
     })[];
     meetings: MeetingSlot[];
 };
+/** Admin curriculum tree — all units with nested pages, including drafts.
+ *  Cohort* prefix: authored source / admin view. Contains draft Page objects
+ *  never visible on student surfaces. */
+export type CohortCurriculum = (Unit & {
+    pages: Page[];
+})[];
 /** Admin operational view of a cohort — GET /lms/admin/cohorts/:slug. */
 export type CohortDetail = {
     cohort: Cohort;
@@ -528,19 +538,15 @@ export type StudentEnrollments = Student & {
     enrollments: Enrollment[];
 };
 /** Response from GET /lms/admin/learn/:cohortSlug/:pageSlug — admin preview context.
- *  Carries the full curriculum tree for the preview shell sidebar. */
+ *  Carries the full curriculum tree for the preview shell sidebar.
+ *  unit field omitted — redundant with curriculum[i]; consumers re-derive current unit by pageId. */
 export type PagePreview = {
     page: Page & {
         mdxContent: string;
         video?: PageVideo;
     };
-    unit: Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked'> & {
-        pages: PageSummary[];
-    };
     cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
-    curriculum: (Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked'> & {
-        pages: PageSummary[];
-    })[];
+    curriculum: UnitSummary[];
     resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
 export type PageSource = Page & {
@@ -552,7 +558,7 @@ export type PageSource = Page & {
 };
 /** Slim response for student article body. Used on the student learn path.
  *  The learn chrome gets curriculum/unit metadata from the TQ cache, not this payload. */
-export type PageContent = {
+export type StudentPageContent = {
     page: Pick<Page, 'pageId' | 'slug' | 'title' | 'layout'> & {
         video?: PageVideo;
         mdxContent: string;
