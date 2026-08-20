@@ -208,7 +208,7 @@ export type EnrollmentCounts = {
 export type Cohort = {
   cohortSlug: string;  // stable slug — primary identity
   campName: string;
-  cohortName: string;
+  name: string;
   format: CohortFormat;
   unitLabel: UnitLabel;
   /**
@@ -234,7 +234,7 @@ export type Cohort = {
 export type CohortSummary = {
   cohortSlug:       string;
   campName:         string;
-  cohortName:       string;
+  name:             string;
   format:           CohortFormat;
   unitLabel:        UnitLabel;
   status:           CohortStatus;
@@ -273,7 +273,7 @@ export type Enrollment = {
   updatedAt: string;
   // ─── Cohort context ───────────────────────────────────────────────────────
   campName: string;
-  cohortName: string;
+  cohortName: string;   // prefix for disambiguation
   unitLabel: UnitLabel;
   format: CohortFormat;
   description: string | null;
@@ -377,7 +377,7 @@ export type ResolvedMedia = Omit<Media, 's3Key' | 'poster' | 'createdAt'> & {
 export type MeetingCohort = Pick<Cohort,
   | 'cohortSlug'
   | 'campName'
-  | 'cohortName'
+  | 'name'
   | 'status'
   | 'startDate'
   | 'endDate'
@@ -385,7 +385,7 @@ export type MeetingCohort = Pick<Cohort,
 
 // An audience is either a sentinel string (derived from the MeetingAudience const) or a resolved cohort.
 // typeof audience === 'string' → sentinel (MeetingAudience.COMMUNITY or .PUBLIC)
-// typeof audience === 'object' → cohort (campName, cohortName, etc. available directly)
+// typeof audience === 'object' → cohort (campName, name, etc. available directly)
 export type MeetingAudience = typeof MeetingAudience[keyof typeof MeetingAudience] | MeetingCohort;
 
 export type Meeting = {
@@ -454,10 +454,10 @@ export type MagicLinkValidation = {
   valid: true;
   returning: boolean;
   contactEmail: string;
-  cohortName: string;
-  campName: string;
-  enrollmentId: string;
   cohortSlug: string;
+  campName: string;
+  cohortName: string;
+  enrollmentId: string;
 };
 
 // ─── Curriculum Types ────────────────────────────────────────────────────────
@@ -495,7 +495,7 @@ export type StudentCurriculumUnit = {
  * (unitLabel, status) plus standard identity.
  */
 export type StudentCurriculum = {
-  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'unitLabel' | 'status'>;
+  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'unitLabel' | 'status'>;
   units: StudentCurriculumUnit[];
 };
 
@@ -734,7 +734,7 @@ export type StudentEnrollments = Student & {
  *  unit field omitted — redundant with curriculum[i]; consumers re-derive current unit by pageId. */
 export type PagePreview = {
   page: Page & { mdxContent: string; video?: PageVideo };
-  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
+  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'name'>;
   curriculum: UnitSummary[];
   resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
@@ -744,7 +744,7 @@ export type PageSource = Page & {
   /** Raw videoSource map for the editor — present when layout === 'video'. */
   videoSource?: VideoSource;
   /** Cohort display strings for breadcrumb rendering — eliminates second fetch on page editor. */
-  cohort: Pick<Cohort, 'campName' | 'cohortName'>;
+  cohort: Pick<Cohort, 'campName' | 'name'>;
 };
 
 /** Slim response for student article body. Used on the student learn path.
@@ -752,7 +752,7 @@ export type PageSource = Page & {
 export type StudentPageContent = {
   page: Pick<Page, 'pageId' | 'slug' | 'title' | 'layout'> & { video?: PageVideo; mdxContent: string };
   unit: Pick<Unit, 'unitId' | 'title' | 'position'>;
-  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
+  cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'name'>;
   resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
 

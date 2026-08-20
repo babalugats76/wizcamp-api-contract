@@ -177,7 +177,7 @@ export type EnrollmentCounts = {
 export type Cohort = {
     cohortSlug: string;
     campName: string;
-    cohortName: string;
+    name: string;
     format: CohortFormat;
     unitLabel: UnitLabel;
     /**
@@ -202,7 +202,7 @@ export type Cohort = {
 export type CohortSummary = {
     cohortSlug: string;
     campName: string;
-    cohortName: string;
+    name: string;
     format: CohortFormat;
     unitLabel: UnitLabel;
     status: CohortStatus;
@@ -324,7 +324,7 @@ export type ResolvedMedia = Omit<Media, 's3Key' | 'poster' | 'createdAt'> & {
     url: string;
     posterUrl: string | null;
 };
-export type MeetingCohort = Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'status' | 'startDate' | 'endDate'>;
+export type MeetingCohort = Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'status' | 'startDate' | 'endDate'>;
 export type MeetingAudience = typeof MeetingAudience[keyof typeof MeetingAudience] | MeetingCohort;
 export type Meeting = {
     meetingId: string;
@@ -373,10 +373,10 @@ export type MagicLinkValidation = {
     valid: true;
     returning: boolean;
     contactEmail: string;
-    cohortName: string;
-    campName: string;
-    enrollmentId: string;
     cohortSlug: string;
+    campName: string;
+    cohortName: string;
+    enrollmentId: string;
 };
 /** Unified student-facing page in a cohort curriculum.
  *  Replaces StudentPage in new codepaths. firstVisitedAt is write-once (first visit);
@@ -409,7 +409,7 @@ export type StudentCurriculumUnit = {
  * (unitLabel, status) plus standard identity.
  */
 export type StudentCurriculum = {
-    cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName' | 'unitLabel' | 'status'>;
+    cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'unitLabel' | 'status'>;
     units: StudentCurriculumUnit[];
 };
 export type ProgressSummary = {
@@ -541,7 +541,7 @@ export type PagePreview = {
         mdxContent: string;
         video?: PageVideo;
     };
-    cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
+    cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'name'>;
     curriculum: UnitSummary[];
     resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
@@ -550,7 +550,7 @@ export type PageSource = Page & {
     /** Raw videoSource map for the editor — present when layout === 'video'. */
     videoSource?: VideoSource;
     /** Cohort display strings for breadcrumb rendering — eliminates second fetch on page editor. */
-    cohort: Pick<Cohort, 'campName' | 'cohortName'>;
+    cohort: Pick<Cohort, 'campName' | 'name'>;
 };
 /** Slim response for student article body. Used on the student learn path.
  *  The learn chrome gets curriculum/unit metadata from the TQ cache, not this payload. */
@@ -560,7 +560,7 @@ export type StudentPageContent = {
         mdxContent: string;
     };
     unit: Pick<Unit, 'unitId' | 'title' | 'position'>;
-    cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'cohortName'>;
+    cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'name'>;
     resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
 export type CreateMeetingInput = {
