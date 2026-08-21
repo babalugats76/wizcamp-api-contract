@@ -743,6 +743,8 @@ export type PageSource = Page & {
   mdxContent: string;
   /** Raw videoSource map for the editor — present when layout === 'video'. */
   videoSource?: VideoSource;
+  /** Content hash returned by getPageSource — echo back on save for conflict detection. */
+  contentHash?: string;
   /** Cohort display strings for breadcrumb rendering — eliminates second fetch on page editor. */
   cohort: Pick<Cohort, 'campName' | 'name'>;
 };
@@ -796,6 +798,51 @@ export type MeetingListParams = {
 
 export type RemoveAudienceResponse = {
   deleted: boolean; // true if the meeting was cascade-deleted (last audience removed), false if only unassigned
+};
+
+// ─── Page Editor Contract ────────────────────────────────────────────────────
+
+/**
+ * Canonical page-save payload shapes and revision types — single source of truth
+ * shared by wizcamp-backend (admin/pages.router.ts) and wizcamp-lms (use-page-editor /
+ * blockers.ts gate). Hand-mirrored local copies are not permitted. This package is
+ * types-and-constants only: consumers own their own validation — the contract owns
+ * the shapes.
+ */
+
+/** m:ss duration — unpadded minutes, zero-padded seconds capped at 59 (e.g. '3:07'). */
+export const DURATION_RE = /^\d+:[0-5]\d$/;
+
+export type PageMetadata =
+  | { layout: 'doc' }
+  | {
+      layout: 'video';
+      videoSource: VideoSource;
+      duration?: string;           // must satisfy DURATION_RE
+      recommendedSpeed?: number;   // 0.5–2
+    };
+
+/** Page save payload — expectedVersion is the OCC token echoed back from Page.version. */
+export type UpdatePageInput = {
+  title?:           string;
+  content?:         string;
+  metadata?:        PageMetadata;
+  expectedVersion?: number;
+};
+
+export type RevisionKind = 'autosave' | 'manual' | 'publish' | 'restore' | 'conflict';
+
+export type PageRevision = {
+  revisionId:  string;
+  version:     number;
+  contentHash: string;
+  byteSize:    number;
+  title:       string;
+  layout:      PageLayout;
+  authorId:    string;
+  authorName:  string;
+  kind:        RevisionKind;
+  createdAt:   string;
 };
 
 // ─── Engagement ─────────────────────────────────────────────────────────────

@@ -1,7 +1,7 @@
 "use strict";
 // packages/api-contract/src/lms/index.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
+exports.DURATION_RE = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
 exports.toStudentProgress = toStudentProgress;
 // ─── Enums & Constants ───────────────────────────────────────────────────────
 exports.UserRole = {
@@ -179,4 +179,14 @@ function toStudentProgress(curriculum) {
         dripPct: totalUnits > 0 ? Math.round(unlockedUnits / totalUnits * 100) : 0,
     };
 }
+// ─── Page Editor Contract ────────────────────────────────────────────────────
+/**
+ * Canonical page-save payload shapes and revision types — single source of truth
+ * shared by wizcamp-backend (admin/pages.router.ts) and wizcamp-lms (use-page-editor /
+ * blockers.ts gate). Hand-mirrored local copies are not permitted. This package is
+ * types-and-constants only: consumers own their own validation — the contract owns
+ * the shapes.
+ */
+/** m:ss duration — unpadded minutes, zero-padded seconds capped at 59 (e.g. '3:07'). */
+exports.DURATION_RE = /^\d+:[0-5]\d$/;
 //# sourceMappingURL=index.js.map
