@@ -607,6 +607,7 @@ export type RemoveAudienceResponse = {
  */
 /** m:ss duration — unpadded minutes, zero-padded seconds capped at 59 (e.g. '3:07'). */
 export declare const DURATION_RE: RegExp;
+/** Discriminated on layout — 'doc' carries no extra fields; 'video' requires a resolved VideoSource. */
 export type PageMetadata = {
     layout: 'doc';
 } | {
@@ -622,7 +623,9 @@ export type UpdatePageInput = {
     metadata?: PageMetadata;
     expectedVersion?: number;
 };
+/** Discriminates how a revision was created — drives label and retention policy. */
 export type RevisionKind = 'autosave' | 'manual' | 'publish' | 'restore' | 'conflict';
+/** Immutable snapshot of a page at a point in time — returned by GET /pages/:pageId/revisions. */
 export type PageRevision = {
     revisionId: string;
     version: number;
