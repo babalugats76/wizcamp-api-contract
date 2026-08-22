@@ -549,8 +549,6 @@ export type PageSource = Page & {
     mdxContent: string;
     /** Raw videoSource map for the editor — present when layout === 'video'. */
     videoSource?: VideoSource;
-    /** Content hash returned by getPageSource — echo back on save for conflict detection. */
-    contentHash?: string;
     /** Cohort display strings for breadcrumb rendering — eliminates second fetch on page editor. */
     cohort: Pick<Cohort, 'campName' | 'name'>;
 };
