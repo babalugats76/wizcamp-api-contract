@@ -623,21 +623,6 @@ export type UpdatePageInput = {
     metadata?: PageMetadata;
     expectedVersion?: number;
 };
-/** Discriminates how a revision was created — drives label and retention policy. */
-export type RevisionKind = 'autosave' | 'manual' | 'publish' | 'restore' | 'conflict';
-/** Immutable snapshot of a page at a point in time — returned by GET /pages/:pageId/revisions. */
-export type PageRevision = {
-    revisionId: string;
-    version: number;
-    contentHash: string;
-    byteSize: number;
-    title: string;
-    layout: PageLayout;
-    authorId: string;
-    authorName: string;
-    kind: RevisionKind;
-    createdAt: string;
-};
 /**
  * Per-page visit record for a single student — used in StudentEngagement.
  * visitCount semantics: incremented at most once per 30-minute window per
