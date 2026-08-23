@@ -12,7 +12,8 @@
  * - Student* prefix: per-student derived view — always carries enrollment or visit state
  *     (StudentCurriculum, StudentCurriculumUnit, StudentCurriculumPage, StudentCohortLanding,
  *      StudentPageContent, StudentProgress, StudentDashboard, StudentEngagement, StudentEnrollments)
- * - *Summary suffix: lean nav descriptors, surface-neutral — shared by admin and student (PageSummary, UnitSummary, CohortSummary)
+ * - *Summary suffix: lean nav descriptors, surface-neutral — shared by admin and student (PageSummary, UnitSummary, CohortSummary, EnrollmentSummary)
+ * - CohortStats: CohortSummary plus pre-aggregated unit/enrollment counts — admin cohort list only
  * - Composed read DTOs: *Detail suffix (CohortDetail) or descriptive noun (CohortRoster)
  * - Flat compound join types: bare name (Enrollment — enrollment + cohort + student identity)
  * - HTTP response bodies: *Response suffix
@@ -229,17 +230,23 @@ export type Cohort = {
   updatedAt: string;
 };
 
-/** Lean cohort row for list endpoints — carries pre-aggregated counts that are
- *  efficient to compute at list-query time but do not belong on the entity. */
-export type CohortSummary = {
-  cohortSlug:       string;
-  campName:         string;
-  name:             string;
-  format:           CohortFormat;
-  unitLabel:        UnitLabel;
-  status:           CohortStatus;
-  startDate:        string;
-  endDate:          string;
+/** Lean cohort identity descriptor — surface-neutral.
+ *  Used as the base for CohortStats and as a standalone type wherever
+ *  full Cohort entity fields are not needed. */
+export type CohortSummary = Pick<Cohort,
+  | 'cohortSlug'
+  | 'campName'
+  | 'name'
+  | 'format'
+  | 'unitLabel'
+  | 'status'
+  | 'startDate'
+  | 'endDate'
+>;
+
+/** Cohort identity plus pre-aggregated counts that are efficient to compute at
+ *  list-query time but do not belong on the entity. Admin cohort list only. */
+export type CohortStats = CohortSummary & {
   unitCount:        number;
   enrollmentCounts: EnrollmentCounts;
 };
@@ -291,6 +298,16 @@ export type Enrollment = {
   avatarUrl: string | null; // null until student claims enrollment via OAuth
   parentEmail: string | null;
 };
+
+/** Minimal enrollment identity for student-facing surfaces.
+ *  Carries enough to identify the enrollment and its state without
+ *  the full Enrollment join type. */
+export type EnrollmentSummary = Pick<Enrollment,
+  | 'enrollmentId'
+  | 'status'
+  | 'enrolledAt'
+  | 'cohortSlug'
+>;
 
 export type PageVideo = {
   sourceType: VideoSourceType;
@@ -658,24 +675,25 @@ export function toStudentProgress(
 /**
  * Student cohort landing payload — GET /lms/students/me/cohorts/:slug.
  *
- * Hero band data: cohort identity, enrollment state, progress scalars,
- * classmate strip, and schedule rail. Does NOT include the curriculum tree —
- * that is fetched separately via GET /lms/learn/:slug → StudentCurriculum and
- * cached under queryKeys.student.curriculum(cohortSlug). Both fetches fire in
- * parallel in student.service.ts so page-view-tracker can patch the curriculum
- * cache independently without invalidating this payload.
+ * Hero band data: cohort identity, enrollment state, classmate strip, and
+ * schedule rail. Does NOT include the curriculum tree — that is fetched
+ * separately via GET /lms/learn/:slug → StudentCurriculum and cached under
+ * queryKeys.student.curriculum(cohortSlug). Both fetches fire in parallel in
+ * student.service.ts so page-view-tracker can patch the curriculum cache
+ * independently without invalidating this payload.
  *
- * progress: ProgressSummary scalars only — StudentProgress (resumeTarget) is
- * derived client-side from StudentCurriculum via toStudentProgress.
+ * No progress field — derived client-side via toStudentProgress(curriculum);
+ * server-computed scalars were serialized here only to be ignored in favour of
+ * the TQ-derived value, which stays live after page-view-tracker cache patches.
  * classmates: firstName + avatarUrl only — count and slice are client-side.
  * meetings: cohort-scoped slots only — community/public come from the dashboard.
  */
 export type StudentCohortLanding = {
   cohort:      Cohort;
-  enrollment:  Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt' | 'cohortSlug'>;
-  progress:    ProgressSummary;
+  enrollment:  EnrollmentSummary;   // was: Pick<Enrollment, ...>
   classmates:  Pick<Student, 'firstName' | 'avatarUrl'>[];
   meetings:    MeetingSlot[];
+  // progress removed — derived client-side via toStudentProgress(curriculum)
 };
 
 /**
@@ -689,7 +707,7 @@ export type StudentCohortLanding = {
 export type StudentDashboard = {
   cohorts: ({
     cohort:      Cohort;
-    enrollment:  Pick<Enrollment, 'enrollmentId' | 'status' | 'enrolledAt' | 'cohortSlug'>;
+    enrollment:  EnrollmentSummary;  // was: Pick<Enrollment, ...>
     progress:    ProgressSummary;
   })[];
   meetings: MeetingSlot[];
