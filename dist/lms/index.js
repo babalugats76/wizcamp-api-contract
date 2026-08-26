@@ -1,7 +1,7 @@
 "use strict";
 // packages/api-contract/src/lms/index.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DURATION_RE = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
+exports.DURATION_RE = exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
 exports.toStudentProgress = toStudentProgress;
 // ─── Enums & Constants ───────────────────────────────────────────────────────
 exports.UserRole = {
@@ -95,6 +95,30 @@ exports.OpenRouterKeyLimitReset = {
     DAILY: 'daily',
     WEEKLY: 'weekly',
     MONTHLY: 'monthly',
+};
+exports.MEETING_TYPE_META = {
+    [exports.MeetingType.CLASS]: { label: 'Class', tone: 'indigo', audience: 'cohort' },
+    [exports.MeetingType.FLEX]: { label: 'Flex', tone: 'violet', audience: 'cohort' },
+    [exports.MeetingType.OFFICE_HOURS]: { label: 'Office Hours', tone: 'sky', audience: 'open' },
+    [exports.MeetingType.COACHING]: { label: 'Coaching', tone: 'amber', audience: 'open' },
+    [exports.MeetingType.WORKSHOP]: { label: 'Workshop', tone: 'orange', audience: 'open' },
+    [exports.MeetingType.SOCIAL]: { label: 'Social', tone: 'emerald', audience: 'open' },
+    [exports.MeetingType.WEBINAR]: { label: 'Webinar', tone: 'teal', audience: 'open' },
+    [exports.MeetingType.GENERAL]: { label: 'General', tone: 'slate', audience: 'open' },
+};
+exports.MEETING_TYPE_ORDER = [
+    exports.MeetingType.CLASS,
+    exports.MeetingType.FLEX,
+    exports.MeetingType.OFFICE_HOURS,
+    exports.MeetingType.COACHING,
+    exports.MeetingType.WORKSHOP,
+    exports.MeetingType.SOCIAL,
+    exports.MeetingType.WEBINAR,
+    exports.MeetingType.GENERAL,
+];
+exports.MEETING_AUDIENCE_LABEL = {
+    [exports.MeetingAudience.PUBLIC]: 'Public',
+    [exports.MeetingAudience.COMMUNITY]: 'Community',
 };
 /**
  * Pure isomorphic mapper — builds StudentProgress from ProgressInput.

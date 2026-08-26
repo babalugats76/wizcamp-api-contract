@@ -325,6 +325,15 @@ export type ResolvedMedia = Omit<Media, 's3Key' | 'poster' | 'createdAt'> & {
     url: string;
     posterUrl: string | null;
 };
+export type MeetingTypeTone = 'indigo' | 'violet' | 'sky' | 'amber' | 'orange' | 'emerald' | 'teal' | 'slate';
+export type MeetingTypeMeta = {
+    label: string;
+    tone: MeetingTypeTone;
+    audience: 'cohort' | 'open';
+};
+export declare const MEETING_TYPE_META: Record<MeetingType, MeetingTypeMeta>;
+export declare const MEETING_TYPE_ORDER: MeetingType[];
+export declare const MEETING_AUDIENCE_LABEL: Record<typeof MeetingAudience[keyof typeof MeetingAudience], string>;
 export type MeetingCohort = Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'status' | 'startDate' | 'endDate'>;
 export type MeetingAudience = typeof MeetingAudience[keyof typeof MeetingAudience] | MeetingCohort;
 export type Meeting = {
@@ -593,6 +602,24 @@ export type MeetingListParams = {
     from?: string;
     to?: string;
     audienceId?: string;
+};
+export type EditScope = 'this' | 'this-and-following' | 'all';
+export type UpdateMeetingInput = {
+    meetingId: string;
+    editScope: EditScope;
+    title?: string;
+    meetingType?: MeetingType;
+    startTime?: string;
+    durationMinutes?: number;
+    zoomLink?: string;
+    recordingUrl?: string;
+    description?: string;
+};
+/** Always an array — uniform shape regardless of editScope.
+ *  For 'this', length is 1. For 'this-and-following' and 'all', length is N. */
+export type UpdateMeetingResponse = {
+    editScope: EditScope;
+    meetings: Meeting[];
 };
 export type RemoveAudienceResponse = {
     deleted: boolean;

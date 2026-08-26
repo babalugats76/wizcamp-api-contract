@@ -391,6 +391,49 @@ export type ResolvedMedia = Omit<Media, 's3Key' | 'poster' | 'createdAt'> & {
 
 // ─── Meeting Types ───────────────────────────────────────────────────────────
 
+export type MeetingTypeTone =
+  | 'indigo'
+  | 'violet'
+  | 'sky'
+  | 'amber'
+  | 'orange'
+  | 'emerald'
+  | 'teal'
+  | 'slate';
+
+export type MeetingTypeMeta = {
+  label:    string;
+  tone:     MeetingTypeTone;
+  audience: 'cohort' | 'open';
+};
+
+export const MEETING_TYPE_META: Record<MeetingType, MeetingTypeMeta> = {
+  [MeetingType.CLASS]:        { label: 'Class',        tone: 'indigo',  audience: 'cohort' },
+  [MeetingType.FLEX]:         { label: 'Flex',         tone: 'violet',  audience: 'cohort' },
+  [MeetingType.OFFICE_HOURS]: { label: 'Office Hours', tone: 'sky',     audience: 'open'   },
+  [MeetingType.COACHING]:     { label: 'Coaching',     tone: 'amber',   audience: 'open'   },
+  [MeetingType.WORKSHOP]:     { label: 'Workshop',     tone: 'orange',  audience: 'open'   },
+  [MeetingType.SOCIAL]:       { label: 'Social',       tone: 'emerald', audience: 'open'   },
+  [MeetingType.WEBINAR]:      { label: 'Webinar',      tone: 'teal',    audience: 'open'   },
+  [MeetingType.GENERAL]:      { label: 'General',      tone: 'slate',   audience: 'open'   },
+};
+
+export const MEETING_TYPE_ORDER: MeetingType[] = [
+  MeetingType.CLASS,
+  MeetingType.FLEX,
+  MeetingType.OFFICE_HOURS,
+  MeetingType.COACHING,
+  MeetingType.WORKSHOP,
+  MeetingType.SOCIAL,
+  MeetingType.WEBINAR,
+  MeetingType.GENERAL,
+];
+
+export const MEETING_AUDIENCE_LABEL: Record<typeof MeetingAudience[keyof typeof MeetingAudience], string> = {
+  [MeetingAudience.PUBLIC]:    'Public',
+  [MeetingAudience.COMMUNITY]: 'Community',
+};
+
 export type MeetingCohort = Pick<Cohort,
   | 'cohortSlug'
   | 'campName'
@@ -808,6 +851,27 @@ export type MeetingListParams = {
   from?:       string;  // UTC ISO 8601 — start of date window (inclusive)
   to?:         string;  // UTC ISO 8601 — end of date window (inclusive)
   audienceId?: string;  // cohortId or sentinel ('COMMUNITY', 'PUBLIC')
+};
+
+export type EditScope = 'this' | 'this-and-following' | 'all';
+
+export type UpdateMeetingInput = {
+  meetingId:        string;
+  editScope:        EditScope;
+  title?:           string;
+  meetingType?:     MeetingType;
+  startTime?:       string;   // UTC ISO string
+  durationMinutes?: number;
+  zoomLink?:        string;
+  recordingUrl?:    string;
+  description?:     string;
+};
+
+/** Always an array — uniform shape regardless of editScope.
+ *  For 'this', length is 1. For 'this-and-following' and 'all', length is N. */
+export type UpdateMeetingResponse = {
+  editScope: EditScope;
+  meetings:  Meeting[];
 };
 
 // ─── Admin page editor ────────────────────────────────────────────────────────
