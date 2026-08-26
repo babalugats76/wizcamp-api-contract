@@ -1,7 +1,7 @@
 "use strict";
 // packages/api-contract/src/lms/index.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DURATION_RE = exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
+exports.DURATION_RE = exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
 exports.toStudentProgress = toStudentProgress;
 // ─── Enums & Constants ───────────────────────────────────────────────────────
 exports.UserRole = {
@@ -74,11 +74,6 @@ exports.MeetingType = {
 exports.MeetingSource = {
     ZOOM_API: 'zoom_api', // created and managed via Zoom API
     MANUAL_LINK: 'manual_link', // join URL pasted manually; no API sync available
-};
-exports.MeetingEditScope = {
-    THIS: 'this', // update only this occurrence
-    FUTURE: 'future', // update this and all future occurrences
-    ALL: 'all', // update all occurrences in the series
 };
 exports.MeetingAudience = {
     COMMUNITY: 'COMMUNITY', // LMS-wide — all verified members; joinUrl in portal only, never public

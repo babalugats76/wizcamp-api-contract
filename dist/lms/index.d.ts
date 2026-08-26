@@ -124,12 +124,21 @@ export declare const MeetingSource: {
     readonly MANUAL_LINK: "manual_link";
 };
 export type MeetingSource = (typeof MeetingSource)[keyof typeof MeetingSource];
-export declare const MeetingEditScope: {
-    readonly THIS: "this";
-    readonly FUTURE: "future";
-    readonly ALL: "all";
-};
-export type MeetingEditScope = (typeof MeetingEditScope)[keyof typeof MeetingEditScope];
+/**
+ * Scope of a meeting edit operation.
+ *
+ * - 'this'              — update only this occurrence (single or recurring)
+ * - 'this-and-following' — update this occurrence and all future ones in the series
+ *                          (Zoom recurring only; requires zoomOccurrenceId)
+ * - 'all'              — update every occurrence in the series
+ *
+ * Note: in wizcamp-backend `meeting.ts`, 'this-and-following' and 'all' share
+ * the same non-'this' code path. 'all' is accepted by the Zod schema but the
+ * service does not branch on it explicitly — both values produce a full-series
+ * bulk update. This gap should be addressed when the edit-scope UI is wired up
+ * in the meeting form (wizcamp-lms #1220).
+ */
+export type MeetingEditScope = 'this' | 'this-and-following' | 'all';
 export declare const MeetingAudience: {
     readonly COMMUNITY: "COMMUNITY";
     readonly PUBLIC: "PUBLIC";
@@ -603,10 +612,9 @@ export type MeetingListParams = {
     to?: string;
     audienceId?: string;
 };
-export type EditScope = 'this' | 'this-and-following' | 'all';
 export type UpdateMeetingInput = {
     meetingId: string;
-    editScope: EditScope;
+    editScope: MeetingEditScope;
     title?: string;
     meetingType?: MeetingType;
     startTime?: string;
@@ -618,7 +626,7 @@ export type UpdateMeetingInput = {
 /** Always an array — uniform shape regardless of editScope.
  *  For 'this', length is 1. For 'this-and-following' and 'all', length is N. */
 export type UpdateMeetingResponse = {
-    editScope: EditScope;
+    editScope: MeetingEditScope;
     meetings: Meeting[];
 };
 export type RemoveAudienceResponse = {
