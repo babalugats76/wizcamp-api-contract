@@ -67,17 +67,17 @@ exports.MeetingType = {
     OFFICE_HOURS: 'office_hours', // open Q&A / help time
     COACHING: 'coaching', // 1:1 or small group mentoring
     WORKSHOP: 'workshop', // hands-on focused session
-    SOCIAL: 'social', // non-instructional gathering, community building
+    EVENT: 'event', // non-instructional gathering, community building
     WEBINAR: 'webinar', // presentation-style, potentially public-facing
-    GENERAL: 'general', // catch-all
 };
 exports.MeetingSource = {
     ZOOM_API: 'zoom_api', // created and managed via Zoom API
     MANUAL_LINK: 'manual_link', // join URL pasted manually; no API sync available
 };
 exports.MeetingAudience = {
-    COMMUNITY: 'COMMUNITY', // LMS-wide — all verified members; joinUrl in portal only, never public
-    PUBLIC: 'PUBLIC', // open to anyone — joinUrl exposed on public marketing site
+    WIZCAMPERS: 'WIZCAMPERS', // all enrolled students across all cohorts
+    FAMILIES: 'FAMILIES', // parents and guardians of enrolled students
+    COMMUNITY: 'COMMUNITY', // open registration / email list — no LMS account required
 };
 exports.ProgressStatus = {
     NOT_STARTED: 'not_started',
@@ -92,14 +92,13 @@ exports.OpenRouterKeyLimitReset = {
     MONTHLY: 'monthly',
 };
 exports.MEETING_TYPE_META = {
-    [exports.MeetingType.CLASS]: { label: 'Class', tone: 'indigo', audience: 'cohort' },
-    [exports.MeetingType.FLEX]: { label: 'Flex', tone: 'violet', audience: 'cohort' },
-    [exports.MeetingType.OFFICE_HOURS]: { label: 'Office Hours', tone: 'sky', audience: 'open' },
-    [exports.MeetingType.COACHING]: { label: 'Coaching', tone: 'amber', audience: 'open' },
-    [exports.MeetingType.WORKSHOP]: { label: 'Workshop', tone: 'orange', audience: 'open' },
-    [exports.MeetingType.SOCIAL]: { label: 'Social', tone: 'emerald', audience: 'open' },
-    [exports.MeetingType.WEBINAR]: { label: 'Webinar', tone: 'teal', audience: 'open' },
-    [exports.MeetingType.GENERAL]: { label: 'General', tone: 'slate', audience: 'open' },
+    [exports.MeetingType.CLASS]: { label: 'Class', tone: 'indigo' },
+    [exports.MeetingType.FLEX]: { label: 'Flex Class', tone: 'violet' },
+    [exports.MeetingType.OFFICE_HOURS]: { label: 'Office Hours', tone: 'sky' },
+    [exports.MeetingType.COACHING]: { label: 'Coaching', tone: 'amber' },
+    [exports.MeetingType.WORKSHOP]: { label: 'Workshop', tone: 'orange' },
+    [exports.MeetingType.EVENT]: { label: 'Event', tone: 'emerald' },
+    [exports.MeetingType.WEBINAR]: { label: 'Webinar', tone: 'teal' },
 };
 exports.MEETING_TYPE_ORDER = [
     exports.MeetingType.CLASS,
@@ -107,12 +106,12 @@ exports.MEETING_TYPE_ORDER = [
     exports.MeetingType.OFFICE_HOURS,
     exports.MeetingType.COACHING,
     exports.MeetingType.WORKSHOP,
-    exports.MeetingType.SOCIAL,
+    exports.MeetingType.EVENT,
     exports.MeetingType.WEBINAR,
-    exports.MeetingType.GENERAL,
 ];
 exports.MEETING_AUDIENCE_LABEL = {
-    [exports.MeetingAudience.PUBLIC]: 'Public',
+    [exports.MeetingAudience.WIZCAMPERS]: 'Wizcampers',
+    [exports.MeetingAudience.FAMILIES]: 'Families',
     [exports.MeetingAudience.COMMUNITY]: 'Community',
 };
 /**

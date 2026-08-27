@@ -114,9 +114,8 @@ export declare const MeetingType: {
     readonly OFFICE_HOURS: "office_hours";
     readonly COACHING: "coaching";
     readonly WORKSHOP: "workshop";
-    readonly SOCIAL: "social";
+    readonly EVENT: "event";
     readonly WEBINAR: "webinar";
-    readonly GENERAL: "general";
 };
 export type MeetingType = (typeof MeetingType)[keyof typeof MeetingType];
 export declare const MeetingSource: {
@@ -140,8 +139,9 @@ export type MeetingSource = (typeof MeetingSource)[keyof typeof MeetingSource];
  */
 export type MeetingEditScope = 'this' | 'this-and-following' | 'all';
 export declare const MeetingAudience: {
+    readonly WIZCAMPERS: "WIZCAMPERS";
+    readonly FAMILIES: "FAMILIES";
     readonly COMMUNITY: "COMMUNITY";
-    readonly PUBLIC: "PUBLIC";
 };
 export declare const ProgressStatus: {
     readonly NOT_STARTED: "not_started";
@@ -338,11 +338,10 @@ export type MeetingTypeTone = 'indigo' | 'violet' | 'sky' | 'amber' | 'orange' |
 export type MeetingTypeMeta = {
     label: string;
     tone: MeetingTypeTone;
-    audience: 'cohort' | 'open';
 };
 export declare const MEETING_TYPE_META: Record<MeetingType, MeetingTypeMeta>;
 export declare const MEETING_TYPE_ORDER: MeetingType[];
-export declare const MEETING_AUDIENCE_LABEL: Record<typeof MeetingAudience[keyof typeof MeetingAudience], string>;
+export declare const MEETING_AUDIENCE_LABEL: Record<string, string>;
 export type MeetingCohort = Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'status' | 'startDate' | 'endDate'>;
 export type MeetingAudience = typeof MeetingAudience[keyof typeof MeetingAudience] | MeetingCohort;
 export type Meeting = {
@@ -367,7 +366,7 @@ export type MeetingSlot = Pick<Meeting, 'meetingId' | 'joinUrl' | 'startTime' | 
     cohortSlug: string | null;
     campName: string | null;
 };
-export type PublicMeeting = Omit<Meeting, 'joinUrl' | 'passcode' | 'source' | 'providerMeetingId' | 'occurrenceId' | 'createdAt' | 'updatedAt'> & {
+export type CalendarMeeting = Omit<Meeting, 'joinUrl' | 'passcode' | 'source' | 'providerMeetingId' | 'occurrenceId' | 'createdAt' | 'updatedAt'> & {
     joinUrl?: string;
     passcode?: string;
 };

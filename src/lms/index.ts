@@ -134,9 +134,8 @@ export const MeetingType = {
   OFFICE_HOURS: 'office_hours', // open Q&A / help time
   COACHING:     'coaching',     // 1:1 or small group mentoring
   WORKSHOP:     'workshop',     // hands-on focused session
-  SOCIAL:       'social',       // non-instructional gathering, community building
+  EVENT:        'event',        // non-instructional gathering, community building
   WEBINAR:      'webinar',      // presentation-style, potentially public-facing
-  GENERAL:      'general',      // catch-all
 } as const;
 export type MeetingType = (typeof MeetingType)[keyof typeof MeetingType];
 
@@ -163,8 +162,9 @@ export type MeetingSource = (typeof MeetingSource)[keyof typeof MeetingSource];
 export type MeetingEditScope = 'this' | 'this-and-following' | 'all';
 
 export const MeetingAudience = {
-  COMMUNITY: 'COMMUNITY',  // LMS-wide — all verified members; joinUrl in portal only, never public
-  PUBLIC:    'PUBLIC',     // open to anyone — joinUrl exposed on public marketing site
+  WIZCAMPERS: 'WIZCAMPERS', // all enrolled students across all cohorts
+  FAMILIES:   'FAMILIES',   // parents and guardians of enrolled students
+  COMMUNITY:  'COMMUNITY',  // open registration / email list — no LMS account required
 } as const;
 
 export const ProgressStatus = {
@@ -411,20 +411,18 @@ export type MeetingTypeTone =
   | 'slate';
 
 export type MeetingTypeMeta = {
-  label:    string;
-  tone:     MeetingTypeTone;
-  audience: 'cohort' | 'open';
+  label: string;
+  tone:  MeetingTypeTone;
 };
 
 export const MEETING_TYPE_META: Record<MeetingType, MeetingTypeMeta> = {
-  [MeetingType.CLASS]:        { label: 'Class',        tone: 'indigo',  audience: 'cohort' },
-  [MeetingType.FLEX]:         { label: 'Flex',         tone: 'violet',  audience: 'cohort' },
-  [MeetingType.OFFICE_HOURS]: { label: 'Office Hours', tone: 'sky',     audience: 'open'   },
-  [MeetingType.COACHING]:     { label: 'Coaching',     tone: 'amber',   audience: 'open'   },
-  [MeetingType.WORKSHOP]:     { label: 'Workshop',     tone: 'orange',  audience: 'open'   },
-  [MeetingType.SOCIAL]:       { label: 'Social',       tone: 'emerald', audience: 'open'   },
-  [MeetingType.WEBINAR]:      { label: 'Webinar',      tone: 'teal',    audience: 'open'   },
-  [MeetingType.GENERAL]:      { label: 'General',      tone: 'slate',   audience: 'open'   },
+  [MeetingType.CLASS]:        { label: 'Class',        tone: 'indigo'  },
+  [MeetingType.FLEX]:         { label: 'Flex Class',   tone: 'violet'  },
+  [MeetingType.OFFICE_HOURS]: { label: 'Office Hours', tone: 'sky'     },
+  [MeetingType.COACHING]:     { label: 'Coaching',     tone: 'amber'   },
+  [MeetingType.WORKSHOP]:     { label: 'Workshop',     tone: 'orange'  },
+  [MeetingType.EVENT]:        { label: 'Event',        tone: 'emerald' },
+  [MeetingType.WEBINAR]:      { label: 'Webinar',      tone: 'teal'    },
 };
 
 export const MEETING_TYPE_ORDER: MeetingType[] = [
@@ -433,14 +431,14 @@ export const MEETING_TYPE_ORDER: MeetingType[] = [
   MeetingType.OFFICE_HOURS,
   MeetingType.COACHING,
   MeetingType.WORKSHOP,
-  MeetingType.SOCIAL,
+  MeetingType.EVENT,
   MeetingType.WEBINAR,
-  MeetingType.GENERAL,
 ];
 
-export const MEETING_AUDIENCE_LABEL: Record<typeof MeetingAudience[keyof typeof MeetingAudience], string> = {
-  [MeetingAudience.PUBLIC]:    'Public',
-  [MeetingAudience.COMMUNITY]: 'Community',
+export const MEETING_AUDIENCE_LABEL: Record<string, string> = {
+  [MeetingAudience.WIZCAMPERS]: 'Wizcampers',
+  [MeetingAudience.FAMILIES]:   'Families',
+  [MeetingAudience.COMMUNITY]:  'Community',
 };
 
 export type MeetingCohort = Pick<Cohort,
@@ -453,7 +451,7 @@ export type MeetingCohort = Pick<Cohort,
 >;
 
 // An audience is either a sentinel string (derived from the MeetingAudience const) or a resolved cohort.
-// typeof audience === 'string' → sentinel (MeetingAudience.COMMUNITY or .PUBLIC)
+// typeof audience === 'string' → sentinel (MeetingAudience.WIZCAMPERS, .FAMILIES, or .COMMUNITY)
 // typeof audience === 'object' → cohort (campName, name, etc. available directly)
 export type MeetingAudience = typeof MeetingAudience[keyof typeof MeetingAudience] | MeetingCohort;
 
@@ -487,15 +485,15 @@ export type MeetingSlot = Pick<Meeting,
   | 'recordingUrl'
   | 'recordingPasscode'
 > & {
-  cohortSlug: string | null;  // null for COMMUNITY / PUBLIC audience meetings
+  cohortSlug: string | null;  // null for WIZCAMPERS / FAMILIES / COMMUNITY audience meetings
   campName:   string | null;  // null when cohortSlug is null
 };
 
-export type PublicMeeting = Omit<
+export type CalendarMeeting = Omit<
   Meeting,
   'joinUrl' | 'passcode' | 'source' | 'providerMeetingId' | 'occurrenceId' | 'createdAt' | 'updatedAt'
 > & {
-  joinUrl?: string;   // present only for PUBLIC meetings
+  joinUrl?: string;   // optional — calendar surfaces may or may not expose join access
   passcode?: string;
 };
 
@@ -859,7 +857,7 @@ export type CreateRecurringMeetingResponse = {
 export type MeetingListParams = {
   from?:       string;  // UTC ISO 8601 — start of date window (inclusive)
   to?:         string;  // UTC ISO 8601 — end of date window (inclusive)
-  audienceId?: string;  // cohortId or sentinel ('COMMUNITY', 'PUBLIC')
+  audienceId?: string;  // cohortId or sentinel ('WIZCAMPERS', 'FAMILIES', 'COMMUNITY')
 };
 
 export type UpdateMeetingInput = {
