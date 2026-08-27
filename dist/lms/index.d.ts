@@ -334,14 +334,14 @@ export type ResolvedMedia = Omit<Media, 's3Key' | 'poster' | 'createdAt'> & {
     url: string;
     posterUrl: string | null;
 };
-export type MeetingTypeTone = 'indigo' | 'violet' | 'sky' | 'amber' | 'orange' | 'emerald' | 'teal' | 'slate';
+export type MeetingTypeTone = 'indigo' | 'violet' | 'sky' | 'amber' | 'orange' | 'emerald' | 'teal';
 export type MeetingTypeMeta = {
     label: string;
     tone: MeetingTypeTone;
 };
 export declare const MEETING_TYPE_META: Record<MeetingType, MeetingTypeMeta>;
 export declare const MEETING_TYPE_ORDER: MeetingType[];
-export declare const MEETING_AUDIENCE_LABEL: Record<string, string>;
+export declare const MEETING_AUDIENCE_LABEL: Record<typeof MeetingAudience[keyof typeof MeetingAudience], string>;
 export type MeetingCohort = Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'status' | 'startDate' | 'endDate'>;
 export type MeetingAudience = typeof MeetingAudience[keyof typeof MeetingAudience] | MeetingCohort;
 export type Meeting = {

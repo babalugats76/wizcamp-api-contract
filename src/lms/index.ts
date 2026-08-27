@@ -407,8 +407,7 @@ export type MeetingTypeTone =
   | 'amber'
   | 'orange'
   | 'emerald'
-  | 'teal'
-  | 'slate';
+  | 'teal';
 
 export type MeetingTypeMeta = {
   label: string;
@@ -435,7 +434,7 @@ export const MEETING_TYPE_ORDER: MeetingType[] = [
   MeetingType.WEBINAR,
 ];
 
-export const MEETING_AUDIENCE_LABEL: Record<string, string> = {
+export const MEETING_AUDIENCE_LABEL: Record<typeof MeetingAudience[keyof typeof MeetingAudience], string> = {
   [MeetingAudience.WIZCAMPERS]: 'Wizcampers',
   [MeetingAudience.FAMILIES]:   'Families',
   [MeetingAudience.COMMUNITY]:  'Community',
