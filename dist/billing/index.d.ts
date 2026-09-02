@@ -41,9 +41,8 @@ export type PaymentToken = {
  * Renamed from RegistrationRequest in #668 to align with Payment* naming family.
  */
 export type PaymentRequest = {
-    /** The Square catalog item variation ID identifying the cohort offering being purchased.
-     *  The backend maps this to Square's catalogObjectId for order creation. */
-    catalogItemId: string;
+    /** The id of the Cohort being purchased. Maps to Cohort.id from the /camps endpoint. */
+    cohortId: string;
     enrollee: Enrollee;
     registrant: Registrant;
     billing: BillingAddress;

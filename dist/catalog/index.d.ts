@@ -48,6 +48,7 @@ export type Cohort = {
 };
 /** A camp with its available cohorts, as returned by the /camps endpoint. */
 export type Camp = {
+    id: string;
     name: string;
     category: string;
     rootCategory: string;

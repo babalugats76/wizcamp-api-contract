@@ -42,7 +42,7 @@ export type CampPhase = {
 
 /** A single cohort (session/run) of a camp, as returned by the /camps endpoint. */
 export type Cohort = {
-  id: string;
+  id: string; // Square ITEM_VARIATION id — the purchasable session
   name: string;
   sku: string;
   amount: number;
@@ -63,6 +63,7 @@ export type Cohort = {
 
 /** A camp with its available cohorts, as returned by the /camps endpoint. */
 export type Camp = {
+  id: string; // Square ITEM id — stable join key for CMS content
   name: string;
   category: string;
   rootCategory: string;
