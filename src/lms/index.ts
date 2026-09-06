@@ -488,12 +488,19 @@ export type MeetingSlot = Pick<Meeting,
   campName:   string | null;  // null when cohortSlug is null
 };
 
-export type CalendarMeeting = Omit<
-  Meeting,
-  'joinUrl' | 'passcode' | 'source' | 'providerMeetingId' | 'occurrenceId' | 'createdAt' | 'updatedAt'
-> & {
-  joinUrl?: string;   // optional — calendar surfaces may or may not expose join access
-  passcode?: string;
+/**
+ * Public-facing calendar meeting shape — no join/recording/provider fields.
+ * Consumed by GET /schedule (unauthenticated public endpoint).
+ * wizcamp-lms admin calendar uses Meeting directly and is unaffected.
+ */
+export type CalendarMeeting = {
+  meetingId:       string;
+  title:           string;
+  agenda:          string | null;
+  startTime:       string;          // UTC ISO 8601
+  durationMinutes: number;
+  meetingType:     MeetingType;
+  audiences:       MeetingAudience[];
 };
 
 // ─── Auth Types ─────────────────────────────────────────────────────────────
