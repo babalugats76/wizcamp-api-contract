@@ -17,4 +17,16 @@ export type NewsletterSubscription = {
 export type NewsletterResponse = {
     success: true;
 };
+/** What wizcamp-web POSTs to /events/:eventSlug/register. */
+export type EventRegistrationInput = {
+    eventSlug: string;
+    fullName: string;
+    email: string;
+    attendeeRole?: 'parent' | 'student';
+};
+/** What the /events/:eventSlug/register endpoint returns on success. */
+export type EventRegistrationResponse = {
+    success: true;
+    alreadyRegistered: boolean;
+};
 //# sourceMappingURL=index.d.ts.map
