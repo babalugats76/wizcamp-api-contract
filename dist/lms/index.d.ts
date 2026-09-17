@@ -639,7 +639,15 @@ export type UpdateMeetingResponse = {
     meetings: Meeting[];
 };
 export type RemoveAudienceResponse = {
-    deleted: boolean;
+    deleted: false;
+    meeting: Meeting;
+} | {
+    deleted: true;
+};
+/** POST /meetings/:meetingId/audiences — returns the fully-hydrated Meeting after audiences are
+ *  assigned, enabling the frontend to setQueryData instead of refetching. */
+export type AssignAudiencesResponse = {
+    meeting: Meeting;
 };
 /**
  * Canonical page-save payload shapes and revision types — single source of truth
