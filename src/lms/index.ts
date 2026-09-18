@@ -887,8 +887,14 @@ export type UpdateMeetingResponse = {
 
 // ─── Admin page editor ────────────────────────────────────────────────────────
 
-export type RemoveAudienceResponse = {
-  deleted: boolean; // true if the meeting was cascade-deleted (last audience removed), false if only unassigned
+export type RemoveAudienceResponse =
+  | { deleted: false; meeting: Meeting } // audience unassigned — updated meeting returned so the frontend can patch the cache
+  | { deleted: true }; // meeting cascade-deleted (last audience removed) — meeting is gone, nothing more to return
+
+/** POST /meetings/:meetingId/audiences — returns the fully-hydrated Meeting after audiences are
+ *  assigned, enabling the frontend to setQueryData instead of refetching. */
+export type AssignAudiencesResponse = {
+  meeting: Meeting;
 };
 
 // ─── Page Editor Contract ────────────────────────────────────────────────────
