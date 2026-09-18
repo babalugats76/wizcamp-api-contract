@@ -885,8 +885,6 @@ export type UpdateMeetingResponse = {
   meetings:  Meeting[];
 };
 
-// ─── Admin page editor ────────────────────────────────────────────────────────
-
 export type RemoveAudienceResponse =
   | { deleted: false; meeting: Meeting } // audience unassigned — updated meeting returned so the frontend can patch the cache
   | { deleted: true }; // meeting cascade-deleted (last audience removed) — meeting is gone, nothing more to return
