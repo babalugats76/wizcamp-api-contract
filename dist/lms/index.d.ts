@@ -58,12 +58,12 @@ export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
 /** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
 export declare const SLUG_REGEX: RegExp;
 export declare const UnitLabel: {
-    readonly SESSION: "Session";
-    readonly WEEK: "Week";
-    readonly MODULE: "Module";
-    readonly DAY: "Day";
-    readonly PART: "Part";
-    readonly UNIT: "Unit";
+    readonly SESSION: "session";
+    readonly WEEK: "week";
+    readonly MODULE: "module";
+    readonly DAY: "day";
+    readonly PART: "part";
+    readonly UNIT: "unit";
 };
 export type UnitLabel = (typeof UnitLabel)[keyof typeof UnitLabel];
 export declare const EnrollmentStatus: {

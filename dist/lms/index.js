@@ -30,12 +30,12 @@ exports.CohortFormat = {
 /** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
 exports.SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 exports.UnitLabel = {
-    SESSION: 'Session',
-    WEEK: 'Week',
-    MODULE: 'Module',
-    DAY: 'Day',
-    PART: 'Part',
-    UNIT: 'Unit',
+    SESSION: 'session',
+    WEEK: 'week',
+    MODULE: 'module',
+    DAY: 'day',
+    PART: 'part',
+    UNIT: 'unit',
 };
 exports.EnrollmentStatus = {
     PENDING_ONBOARDING: 'pending_onboarding',

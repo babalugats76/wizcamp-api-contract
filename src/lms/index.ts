@@ -79,12 +79,12 @@ export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
 export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 export const UnitLabel = {
-  SESSION: 'Session',
-  WEEK:    'Week',
-  MODULE:  'Module',
-  DAY:     'Day',
-  PART:    'Part',
-  UNIT:    'Unit',
+  SESSION: 'session',
+  WEEK:    'week',
+  MODULE:  'module',
+  DAY:     'day',
+  PART:    'part',
+  UNIT:    'unit',
 } as const;
 export type UnitLabel = (typeof UnitLabel)[keyof typeof UnitLabel];
 
