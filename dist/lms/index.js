@@ -1,8 +1,11 @@
 "use strict";
 // packages/api-contract/src/lms/index.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DURATION_RE = exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
+exports.DURATION_RE = exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = exports.CohortFormat = exports.CampLevelColor = void 0;
 exports.toStudentProgress = toStudentProgress;
+const common_1 = require("../common");
+Object.defineProperty(exports, "CampLevelColor", { enumerable: true, get: function () { return common_1.CampLevelColor; } });
+Object.defineProperty(exports, "CohortFormat", { enumerable: true, get: function () { return common_1.CohortFormat; } });
 // ─── Enums & Constants ───────────────────────────────────────────────────────
 exports.UserRole = {
     STUDENT: 'student',

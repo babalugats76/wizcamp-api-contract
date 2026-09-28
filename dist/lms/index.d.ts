@@ -20,7 +20,7 @@
  */
 import type { MediaImage, MediaVideo, CampLevel } from '../common';
 import { CampLevelColor, CohortFormat } from '../common';
-export type { CampLevelColor, CohortFormat };
+export { CampLevelColor, CohortFormat };
 /** Maps Date → string for JSONB-sourced rows where pg type parsers do not run. */
 export type Jsonified<T> = {
     [K in keyof T]: T[K] extends Date ? string : T[K] extends Date | null ? string | null : T[K];
