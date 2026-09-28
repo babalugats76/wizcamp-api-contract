@@ -6,33 +6,6 @@
 
 import { CohortFormat } from '../common';
 
-// ─── Enums ────────────────────────────────────────────────────────────────────
-export const CohortStatus = {
-  Completed: 'completed',
-  InProgress: 'in-progress',
-  Upcoming: 'upcoming',
-  Inactive: 'inactive',
-} as const;
-export type CohortStatus = (typeof CohortStatus)[keyof typeof CohortStatus];
-
-export const CampStatus = {
-  UPCOMING:    'upcoming',
-  IN_PROGRESS: 'in-progress',
-  CONCLUDED:   'concluded',
-} as const;
-export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
-
-/**
- * Client-computed display state for a camp cohort.
- * Returned by getCampPhase() in lib/date.ts.
- * Never sent over the wire — computed in the browser from startDate/endDate.
- */
-export type CampPhase = {
-  status: CampStatus;
-  label: string;    // e.g. "Starts Tomorrow", "in 3 days", "in progress", "concluded"
-  isActive: boolean;
-};
-
 // ─── Catalog types ────────────────────────────────────────────────────────────
 
 /** A single cohort (session/run) of a camp, as returned by the /camps endpoint. */
@@ -45,8 +18,7 @@ export type Cohort = {
   displayPrice: string;
   currency: string;
   imageUrls: string[];
-  status: CohortStatus;
-  active?: boolean;
+  bookable: boolean;
   startDate?: string;
   endDate?: string;
   meetingTimes?: string[];

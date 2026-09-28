@@ -81,6 +81,28 @@ export type APIErrorResponse = {
 
 export type APIResponse<T> = APISuccessResponse<T> | APIErrorResponse;
 
+// ─── Camp phase ─────────────────────────────────────────────────────────────
+// Moved from catalog/index.ts — consumed by wizcamp-web for client-side phase
+// derivation. Never sent over the wire.
+
+export const CampStatus = {
+  UPCOMING:    'upcoming',
+  IN_PROGRESS: 'in-progress',
+  CONCLUDED:   'concluded',
+} as const;
+export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
+
+/**
+ * Client-computed display state for a camp cohort.
+ * Returned by getCampPhase() in lib/camp-phase.ts.
+ * Never sent over the wire — computed in the browser from startDate/endDate.
+ */
+export type CampPhase = {
+  status: CampStatus;
+  label: string;    // e.g. "Starts Tomorrow", "in 3 days", "in progress", "concluded"
+  isActive: boolean;
+};
+
 export const CohortFormat = {
   FLEX:       'flex',
   BOOT:       'boot',

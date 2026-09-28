@@ -1,27 +1,4 @@
 import { CohortFormat } from '../common';
-export declare const CohortStatus: {
-    readonly Completed: "completed";
-    readonly InProgress: "in-progress";
-    readonly Upcoming: "upcoming";
-    readonly Inactive: "inactive";
-};
-export type CohortStatus = (typeof CohortStatus)[keyof typeof CohortStatus];
-export declare const CampStatus: {
-    readonly UPCOMING: "upcoming";
-    readonly IN_PROGRESS: "in-progress";
-    readonly CONCLUDED: "concluded";
-};
-export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
-/**
- * Client-computed display state for a camp cohort.
- * Returned by getCampPhase() in lib/date.ts.
- * Never sent over the wire — computed in the browser from startDate/endDate.
- */
-export type CampPhase = {
-    status: CampStatus;
-    label: string;
-    isActive: boolean;
-};
 /** A single cohort (session/run) of a camp, as returned by the /camps endpoint. */
 export type Cohort = {
     id: string;
@@ -32,8 +9,7 @@ export type Cohort = {
     displayPrice: string;
     currency: string;
     imageUrls: string[];
-    status: CohortStatus;
-    active?: boolean;
+    bookable: boolean;
     startDate?: string;
     endDate?: string;
     meetingTimes?: string[];

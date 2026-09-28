@@ -56,6 +56,22 @@ export type APIErrorResponse = {
     fields?: string[];
 };
 export type APIResponse<T> = APISuccessResponse<T> | APIErrorResponse;
+export declare const CampStatus: {
+    readonly UPCOMING: "upcoming";
+    readonly IN_PROGRESS: "in-progress";
+    readonly CONCLUDED: "concluded";
+};
+export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
+/**
+ * Client-computed display state for a camp cohort.
+ * Returned by getCampPhase() in lib/camp-phase.ts.
+ * Never sent over the wire — computed in the browser from startDate/endDate.
+ */
+export type CampPhase = {
+    status: CampStatus;
+    label: string;
+    isActive: boolean;
+};
 export declare const CohortFormat: {
     readonly FLEX: "flex";
     readonly BOOT: "boot";
