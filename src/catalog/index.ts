@@ -5,12 +5,7 @@
 // for camp browsing, cohort selection, and checkout UI.
 
 // ─── Enums ────────────────────────────────────────────────────────────────────
-
-export const CohortFormat = {
-  Flex: 'flex',
-  Boot: 'boot',
-} as const;
-export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
+import { CohortFormat } from '../common';
 
 export const CohortStatus = {
   Completed: 'completed',

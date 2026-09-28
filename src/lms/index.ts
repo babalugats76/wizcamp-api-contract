@@ -22,7 +22,7 @@
  */
 
 import type { MediaImage, MediaVideo, CampLevel } from '../common';
-import { CampLevelColor } from '../common';
+import { CampLevelColor, CohortFormat } from '../common';
 export type { CampLevelColor };
 
 // ─── Utility Types ────────────────────────────────────────────────────────────
@@ -67,13 +67,6 @@ export const CohortStatus = {
   CONCLUDED: 'concluded',
 } as const;
 export type CohortStatus = (typeof CohortStatus)[keyof typeof CohortStatus];
-
-export const CohortFormat = {
-  FLEX:       'flex',
-  BOOT:       'boot',
-  SELF_PACED: 'self-paced',
-} as const;
-export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
 
 /** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
 export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

@@ -80,3 +80,10 @@ export type APIErrorResponse = {
 };
 
 export type APIResponse<T> = APISuccessResponse<T> | APIErrorResponse;
+
+export const CohortFormat = {
+  FLEX:       'flex',
+  BOOT:       'boot',
+  SELF_PACED: 'self-paced',
+} as const;
+export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
