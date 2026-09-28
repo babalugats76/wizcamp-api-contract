@@ -19,7 +19,7 @@
  * - Auth types: Auth* prefix (AuthUser)
  */
 import type { MediaImage, MediaVideo, CampLevel } from '../common';
-import { CampLevelColor } from '../common';
+import { CampLevelColor, CohortFormat } from '../common';
 export type { CampLevelColor };
 /** Maps Date → string for JSONB-sourced rows where pg type parsers do not run. */
 export type Jsonified<T> = {
@@ -49,12 +49,6 @@ export declare const CohortStatus: {
     readonly CONCLUDED: "concluded";
 };
 export type CohortStatus = (typeof CohortStatus)[keyof typeof CohortStatus];
-export declare const CohortFormat: {
-    readonly FLEX: "flex";
-    readonly BOOT: "boot";
-    readonly SELF_PACED: "self-paced";
-};
-export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
 /** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
 export declare const SLUG_REGEX: RegExp;
 export declare const UnitLabel: {

@@ -4,9 +4,9 @@
 // These types are returned by the /camps endpoint and consumed by wizcamp-web
 // for camp browsing, cohort selection, and checkout UI.
 
-// ─── Enums ────────────────────────────────────────────────────────────────────
 import { CohortFormat } from '../common';
 
+// ─── Enums ────────────────────────────────────────────────────────────────────
 export const CohortStatus = {
   Completed: 'completed',
   InProgress: 'in-progress',

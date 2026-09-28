@@ -1,7 +1,7 @@
 "use strict";
 // packages/api-contract/src/lms/index.ts
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DURATION_RE = exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortFormat = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
+exports.DURATION_RE = exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = void 0;
 exports.toStudentProgress = toStudentProgress;
 // ─── Enums & Constants ───────────────────────────────────────────────────────
 exports.UserRole = {
@@ -21,11 +21,6 @@ exports.CohortStatus = {
     DRAFT: 'draft',
     ACTIVE: 'active',
     CONCLUDED: 'concluded',
-};
-exports.CohortFormat = {
-    FLEX: 'flex',
-    BOOT: 'boot',
-    SELF_PACED: 'self-paced',
 };
 /** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
 exports.SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;

@@ -56,4 +56,10 @@ export type APIErrorResponse = {
     fields?: string[];
 };
 export type APIResponse<T> = APISuccessResponse<T> | APIErrorResponse;
+export declare const CohortFormat: {
+    readonly FLEX: "flex";
+    readonly BOOT: "boot";
+    readonly SELF_PACED: "self-paced";
+};
+export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
 //# sourceMappingURL=index.d.ts.map

@@ -1,8 +1,4 @@
-export declare const CohortFormat: {
-    readonly Flex: "flex";
-    readonly Boot: "boot";
-};
-export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
+import { CohortFormat } from '../common';
 export declare const CohortStatus: {
     readonly Completed: "completed";
     readonly InProgress: "in-progress";
