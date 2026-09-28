@@ -23,7 +23,7 @@
 
 import type { MediaImage, MediaVideo, CampLevel } from '../common';
 import { CampLevelColor, CohortFormat } from '../common';
-export type { CampLevelColor };
+export type { CampLevelColor, CohortFormat };
 
 // ─── Utility Types ────────────────────────────────────────────────────────────
 
