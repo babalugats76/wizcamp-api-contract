@@ -40,5 +40,8 @@
   },
   "devDependencies": {
     "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "temporal-polyfill": "^1.0.5"
   }
 }
