@@ -2,7 +2,7 @@
 // Meeting domain: meeting entities, categories, sources, audiences, recurrence, edit scope and client-side phase display.
 // Exports the meeting const objects, lookup maps, getMeetingPhase and the meeting request/response shapes.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.MeetingAudience = exports.RecurrenceFrequency = exports.MeetingTone = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingCategory = exports.MeetingStatus = exports.GRACE_MS = exports.IMMINENT_MS = void 0;
+exports.MEETING_AUDIENCE_LABEL = exports.MEETING_CATEGORY_ORDER = exports.MEETING_CATEGORY_META = exports.MeetingAudience = exports.RecurrenceFrequency = exports.MeetingTone = exports.MeetingEditScope = exports.MeetingSource = exports.MeetingCategory = exports.MeetingStatus = exports.GRACE_MS = exports.IMMINENT_MS = void 0;
 exports.getMeetingPhase = getMeetingPhase;
 // ─── Constants ────────────────────────────────────────────────────────────────
 const MIN_MS = 60000;
@@ -66,7 +66,7 @@ exports.MeetingAudience = {
     COMMUNITY: 'COMMUNITY',
 };
 // ─── Lookup maps ──────────────────────────────────────────────────────────────
-exports.MEETING_TYPE_META = {
+exports.MEETING_CATEGORY_META = {
     [exports.MeetingCategory.CLASS]: { label: 'Class', tone: exports.MeetingTone.INDIGO },
     [exports.MeetingCategory.FLEX]: { label: 'Flex Class', tone: exports.MeetingTone.VIOLET },
     [exports.MeetingCategory.OFFICE_HOURS]: { label: 'Office Hours', tone: exports.MeetingTone.SKY },
@@ -75,7 +75,7 @@ exports.MEETING_TYPE_META = {
     [exports.MeetingCategory.EVENT]: { label: 'Event', tone: exports.MeetingTone.EMERALD },
     [exports.MeetingCategory.WEBINAR]: { label: 'Webinar', tone: exports.MeetingTone.TEAL },
 };
-exports.MEETING_TYPE_ORDER = [
+exports.MEETING_CATEGORY_ORDER = [
     exports.MeetingCategory.CLASS,
     exports.MeetingCategory.FLEX,
     exports.MeetingCategory.OFFICE_HOURS,

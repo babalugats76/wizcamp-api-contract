@@ -84,7 +84,7 @@ export type MeetingAudienceGroup = (typeof MeetingAudience)[keyof typeof Meeting
 
 // ─── Lookup maps ──────────────────────────────────────────────────────────────
 
-export const MEETING_TYPE_META: Record<MeetingCategory, MeetingMeta> = {
+export const MEETING_CATEGORY_META: Record<MeetingCategory, MeetingMeta> = {
   [MeetingCategory.CLASS]:        { label: 'Class',        tone: MeetingTone.INDIGO  },
   [MeetingCategory.FLEX]:         { label: 'Flex Class',   tone: MeetingTone.VIOLET  },
   [MeetingCategory.OFFICE_HOURS]: { label: 'Office Hours', tone: MeetingTone.SKY     },
@@ -94,7 +94,7 @@ export const MEETING_TYPE_META: Record<MeetingCategory, MeetingMeta> = {
   [MeetingCategory.WEBINAR]:      { label: 'Webinar',      tone: MeetingTone.TEAL    },
 };
 
-export const MEETING_TYPE_ORDER: MeetingCategory[] = [
+export const MEETING_CATEGORY_ORDER: MeetingCategory[] = [
   MeetingCategory.CLASS,
   MeetingCategory.FLEX,
   MeetingCategory.OFFICE_HOURS,

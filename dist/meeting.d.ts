@@ -64,8 +64,8 @@ export declare const MeetingAudience: {
     readonly COMMUNITY: "COMMUNITY";
 };
 export type MeetingAudienceGroup = (typeof MeetingAudience)[keyof typeof MeetingAudience];
-export declare const MEETING_TYPE_META: Record<MeetingCategory, MeetingMeta>;
-export declare const MEETING_TYPE_ORDER: MeetingCategory[];
+export declare const MEETING_CATEGORY_META: Record<MeetingCategory, MeetingMeta>;
+export declare const MEETING_CATEGORY_ORDER: MeetingCategory[];
 export declare const MEETING_AUDIENCE_LABEL: Record<MeetingAudienceGroup, string>;
 export type MeetingPhase = {
     status: MeetingStatus;
