@@ -1,40 +1,27 @@
-// src/cohort.ts
-// LMS / operational domain — cohort, progress, and student view types.
+// LMS / operational domain: the Cohort entity, admin/student cohort views, progress computation and cohort mutation inputs.
+// Sits at the top of the module graph; re-exports CohortFormat and CohortStatus from primitives for consumer compatibility.
 
+import type { CohortFormat, CohortStatus } from './primitives';
 import type { MediaImage, MediaVideo } from './media';
 import type { CampLevel } from './camp';
-import type { StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail } from './curriculum';
-import { UnitLabel } from './curriculum';
-import type { EnrollmentSummary } from './enrollment';
+import type {
+  ProgressSummary,
+  StudentCurriculumUnit,
+  StudentCurriculumPage,
+  PageViewDetail,
+  UnitLabel,
+} from './curriculum';
+import { ProgressStatus } from './curriculum';
+import type { EnrollmentCounts, EnrollmentSummary } from './enrollment';
 import type { MeetingSlot } from './meeting';
 import type { Student } from './auth';
 
-export const CohortFormat = {
-  FLEX:       'flex',
-  BOOT:       'boot',
-  SELF_PACED: 'self-paced',
-} as const;
-export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
-
-export const CohortStatus = {
-  DRAFT:     'draft',
-  ACTIVE:    'active',
-  CONCLUDED: 'concluded',
-} as const;
-export type CohortStatus = (typeof CohortStatus)[keyof typeof CohortStatus];
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 /** Regex that defines a valid cohort slug. */
 export const SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-export const ProgressStatus = {
-  NOT_STARTED: 'not_started',
-  IN_PROGRESS: 'in_progress',
-  CAUGHT_UP:   'caught_up',
-  COMPLETED:   'completed',
-} as const;
-export type ProgressStatus = (typeof ProgressStatus)[keyof typeof ProgressStatus];
-
-// ─── Core entity ──────────────────────────────────────────────────────────────
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type Cohort = {
   cohortSlug: string;
@@ -68,33 +55,19 @@ export type CohortSummary = Pick<Cohort,
 /** Cohort identity plus pre-aggregated counts — admin cohort list only. */
 export type CohortStats = CohortSummary & {
   unitCount:        number;
-  enrollmentCounts: import('./enrollment').EnrollmentCounts;
+  enrollmentCounts: EnrollmentCounts;
 };
 
 /** Admin operational view of a cohort. */
 export type CohortDetail = {
   cohort: Cohort;
   unitCount: number;
-  enrollmentCounts: import('./enrollment').EnrollmentCounts;
+  enrollmentCounts: EnrollmentCounts;
 };
-
-// ─── Student curriculum ───────────────────────────────────────────────────────
 
 export type StudentCurriculum = {
   cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'unitLabel' | 'status'>;
   units: StudentCurriculumUnit[];
-};
-
-// ─── Progress ─────────────────────────────────────────────────────────────────
-
-export type ProgressSummary = {
-  pagesVisited:   number;
-  pagesAvailable: number;
-  progressPct:    number;
-  unlockedUnits:  number;
-  totalUnits:     number;
-  dripPct:        number;
-  status:         ProgressStatus;
 };
 
 export type ResumeTarget = {
@@ -114,6 +87,50 @@ export type ProgressInput = {
   cohort: { unitLabel: UnitLabel };
   units: StudentCurriculumUnit[];
 };
+
+export type StudentCohortLanding = {
+  cohort:      Cohort;
+  enrollment:  EnrollmentSummary;
+  classmates:  Pick<Student, 'firstName' | 'avatarUrl'>[];
+  meetings:    MeetingSlot[];
+};
+
+export type StudentDashboard = {
+  cohorts: ({
+    cohort:      Cohort;
+    enrollment:  EnrollmentSummary;
+    progress:    ProgressSummary;
+  })[];
+  meetings: MeetingSlot[];
+};
+
+export type StudentEngagement = {
+  cohortSlug:   string;
+  studentId:    string;
+  progress:     ProgressSummary;
+  lastActiveAt: string | null;
+  pages:        PageViewDetail[];
+};
+
+export type CreateCohortInput = {
+  cohortSlug:   string;
+  campName:     string;
+  name:         string;
+  format?:      CohortFormat;
+  unitLabel?:   UnitLabel;
+  description?: string;
+  startDate:    string;
+  endDate:      string;
+  image?:       MediaImage;
+  video?:       MediaVideo;
+  level?:       CampLevel;
+};
+
+export type UpdateCohortInput = Partial<CreateCohortInput> & {
+  status?: CohortStatus;
+};
+
+// ─── Functions ────────────────────────────────────────────────────────────────
 
 export function toStudentProgress(curriculum: ProgressInput): StudentProgress {
   const { cohort, units } = curriculum;
@@ -188,52 +205,6 @@ export function toStudentProgress(curriculum: ProgressInput): StudentProgress {
   };
 }
 
-// ─── Portal DTOs ──────────────────────────────────────────────────────────────
+// ─── Re-exports ───────────────────────────────────────────────────────────────
 
-export type StudentCohortLanding = {
-  cohort:      Cohort;
-  enrollment:  EnrollmentSummary;
-  classmates:  Pick<Student, 'firstName' | 'avatarUrl'>[];
-  meetings:    MeetingSlot[];
-};
-
-export type StudentDashboard = {
-  cohorts: ({
-    cohort:      Cohort;
-    enrollment:  EnrollmentSummary;
-    progress:    ProgressSummary;
-  })[];
-  meetings: MeetingSlot[];
-};
-
-export type StudentEngagement = {
-  cohortSlug:   string;
-  studentId:    string;
-  progress:     ProgressSummary;
-  lastActiveAt: string | null;
-  pages:        PageViewDetail[];
-};
-
-// ─── Mutation inputs ──────────────────────────────────────────────────────────
-
-export type CreateCohortInput = {
-  cohortSlug:   string;
-  campName:     string;
-  name:         string;
-  format?:      CohortFormat;
-  unitLabel?:   UnitLabel;
-  description?: string;
-  startDate:    string;
-  endDate:      string;
-  image?:       MediaImage;
-  video?:       MediaVideo;
-  level?:       CampLevel; // carry over as-is — #122 workstream handles levelRank
-};
-
-export type UpdateCohortInput = Partial<CreateCohortInput> & {
-  status?: CohortStatus;
-};
-
-// Re-export types that other files import from cohort.ts
-export { UnitLabel };
-export type { StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail };
+export { CohortFormat, CohortStatus } from './primitives';

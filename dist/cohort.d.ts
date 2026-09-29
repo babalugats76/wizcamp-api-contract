@@ -1,31 +1,12 @@
+import type { CohortFormat, CohortStatus } from './primitives';
 import type { MediaImage, MediaVideo } from './media';
 import type { CampLevel } from './camp';
-import type { StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail } from './curriculum';
-import { UnitLabel } from './curriculum';
-import type { EnrollmentSummary } from './enrollment';
+import type { ProgressSummary, StudentCurriculumUnit, PageViewDetail, UnitLabel } from './curriculum';
+import type { EnrollmentCounts, EnrollmentSummary } from './enrollment';
 import type { MeetingSlot } from './meeting';
 import type { Student } from './auth';
-export declare const CohortFormat: {
-    readonly FLEX: "flex";
-    readonly BOOT: "boot";
-    readonly SELF_PACED: "self-paced";
-};
-export type CohortFormat = (typeof CohortFormat)[keyof typeof CohortFormat];
-export declare const CohortStatus: {
-    readonly DRAFT: "draft";
-    readonly ACTIVE: "active";
-    readonly CONCLUDED: "concluded";
-};
-export type CohortStatus = (typeof CohortStatus)[keyof typeof CohortStatus];
 /** Regex that defines a valid cohort slug. */
 export declare const SLUG_REGEX: RegExp;
-export declare const ProgressStatus: {
-    readonly NOT_STARTED: "not_started";
-    readonly IN_PROGRESS: "in_progress";
-    readonly CAUGHT_UP: "caught_up";
-    readonly COMPLETED: "completed";
-};
-export type ProgressStatus = (typeof ProgressStatus)[keyof typeof ProgressStatus];
 export type Cohort = {
     cohortSlug: string;
     campName: string;
@@ -47,26 +28,17 @@ export type CohortSummary = Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'f
 /** Cohort identity plus pre-aggregated counts — admin cohort list only. */
 export type CohortStats = CohortSummary & {
     unitCount: number;
-    enrollmentCounts: import('./enrollment').EnrollmentCounts;
+    enrollmentCounts: EnrollmentCounts;
 };
 /** Admin operational view of a cohort. */
 export type CohortDetail = {
     cohort: Cohort;
     unitCount: number;
-    enrollmentCounts: import('./enrollment').EnrollmentCounts;
+    enrollmentCounts: EnrollmentCounts;
 };
 export type StudentCurriculum = {
     cohort: Pick<Cohort, 'cohortSlug' | 'campName' | 'name' | 'unitLabel' | 'status'>;
     units: StudentCurriculumUnit[];
-};
-export type ProgressSummary = {
-    pagesVisited: number;
-    pagesAvailable: number;
-    progressPct: number;
-    unlockedUnits: number;
-    totalUnits: number;
-    dripPct: number;
-    status: ProgressStatus;
 };
 export type ResumeTarget = {
     slug: string;
@@ -85,7 +57,6 @@ export type ProgressInput = {
     };
     units: StudentCurriculumUnit[];
 };
-export declare function toStudentProgress(curriculum: ProgressInput): StudentProgress;
 export type StudentCohortLanding = {
     cohort: Cohort;
     enrollment: EnrollmentSummary;
@@ -123,6 +94,6 @@ export type CreateCohortInput = {
 export type UpdateCohortInput = Partial<CreateCohortInput> & {
     status?: CohortStatus;
 };
-export { UnitLabel };
-export type { StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail };
+export declare function toStudentProgress(curriculum: ProgressInput): StudentProgress;
+export { CohortFormat, CohortStatus } from './primitives';
 //# sourceMappingURL=cohort.d.ts.map

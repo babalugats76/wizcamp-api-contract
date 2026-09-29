@@ -1,7 +1,5 @@
 import { Temporal } from 'temporal-polyfill';
-import type { CohortFormat } from './cohort';
-/** Difficulty level number — 1 (beginner) through 5 (advanced). */
-export type CampLevelNumber = 1 | 2 | 3 | 4 | 5;
+import type { CohortFormat } from './primitives';
 export declare const CampLevelColor: {
     readonly EMERALD: "emerald";
     readonly SKY: "sky";
@@ -10,6 +8,14 @@ export declare const CampLevelColor: {
     readonly VIOLET: "violet";
 };
 export type CampLevelColor = (typeof CampLevelColor)[keyof typeof CampLevelColor];
+export declare const CampStatus: {
+    readonly UPCOMING: "upcoming";
+    readonly IN_PROGRESS: "in-progress";
+    readonly CONCLUDED: "concluded";
+};
+export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
+/** Difficulty level number — 1 (beginner) through 5 (advanced). */
+export type CampLevelNumber = 1 | 2 | 3 | 4 | 5;
 /**
  * Structured camp difficulty level — serializable, no React component references.
  * The display icon is resolved client-side from the `level` number and is never
@@ -21,12 +27,6 @@ export type CampLevel = {
     tagline: string;
     color: CampLevelColor;
 };
-export declare const CampStatus: {
-    readonly UPCOMING: "upcoming";
-    readonly IN_PROGRESS: "in-progress";
-    readonly CONCLUDED: "concluded";
-};
-export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
 /**
  * Client-computed display state for a camp cohort.
  * Returned by getCampPhase().
@@ -37,18 +37,6 @@ export type CampPhase = {
     label: string;
     isActive: boolean;
 };
-/**
- * Computes customer-facing display phase for a camp cohort.
- * `now` and `tz` are required — never default them.
- * Uses PlainDate comparison in `tz` (the "birthday rule") — consistent with
- * what customers see rendered.
- *
- * @param startDate  ISO date string or undefined
- * @param endDate    ISO date string or undefined
- * @param now        current instant (required)
- * @param tz         IANA timezone for calendar-day boundary
- */
-export declare function getCampPhase(startDate: string | undefined, endDate: string | undefined, now: Temporal.Instant, tz: string): CampPhase;
 /**
  * The public sales listing of a cohort, as represented by a Square ITEM_VARIATION.
  * Distinct from cohort.ts's `Cohort` (the LMS operational entity).
@@ -84,4 +72,16 @@ export type Camp = {
     program?: string;
     track?: string;
 };
+/**
+ * Computes customer-facing display phase for a camp cohort.
+ * `now` and `tz` are required — never default them.
+ * Uses PlainDate comparison in `tz` (the "birthday rule") — consistent with
+ * what customers see rendered.
+ *
+ * @param startDate  ISO date string or undefined
+ * @param endDate    ISO date string or undefined
+ * @param now        current instant (required)
+ * @param tz         IANA timezone for calendar-day boundary
+ */
+export declare function getCampPhase(startDate: string | undefined, endDate: string | undefined, now: Temporal.Instant, tz: string): CampPhase;
 //# sourceMappingURL=camp.d.ts.map

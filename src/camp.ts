@@ -1,15 +1,10 @@
-// src/camp.ts
-// Commerce / public domain — Square catalog types.
-// CampSession is the public sales listing of a cohort (Square ITEM_VARIATION).
-// Distinct from cohort.ts's Cohort (the LMS operational entity).
+// Commerce / public domain: the Square-backed camp catalog (Camp, CampSession) and client-side camp phase display.
+// CampSession is the public sales listing of a cohort, distinct from cohort.ts's Cohort (the LMS operational entity).
 
 import { Temporal } from 'temporal-polyfill';
-import type { CohortFormat } from './cohort';
+import type { CohortFormat } from './primitives';
 
-// ─── Camp level ───────────────────────────────────────────────────────────────
-
-/** Difficulty level number — 1 (beginner) through 5 (advanced). */
-export type CampLevelNumber = 1 | 2 | 3 | 4 | 5;
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 export const CampLevelColor = {
   EMERALD: 'emerald',
@@ -19,6 +14,18 @@ export const CampLevelColor = {
   VIOLET:  'violet',
 } as const;
 export type CampLevelColor = (typeof CampLevelColor)[keyof typeof CampLevelColor];
+
+export const CampStatus = {
+  UPCOMING:    'upcoming',
+  IN_PROGRESS: 'in-progress',
+  CONCLUDED:   'concluded',
+} as const;
+export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+/** Difficulty level number — 1 (beginner) through 5 (advanced). */
+export type CampLevelNumber = 1 | 2 | 3 | 4 | 5;
 
 /**
  * Structured camp difficulty level — serializable, no React component references.
@@ -32,15 +39,6 @@ export type CampLevel = {
   color: CampLevelColor;
 };
 
-// ─── Camp phase ───────────────────────────────────────────────────────────────
-
-export const CampStatus = {
-  UPCOMING:    'upcoming',
-  IN_PROGRESS: 'in-progress',
-  CONCLUDED:   'concluded',
-} as const;
-export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
-
 /**
  * Client-computed display state for a camp cohort.
  * Returned by getCampPhase().
@@ -52,6 +50,46 @@ export type CampPhase = {
   isActive: boolean;
 };
 
+/**
+ * The public sales listing of a cohort, as represented by a Square ITEM_VARIATION.
+ * Distinct from cohort.ts's `Cohort` (the LMS operational entity).
+ */
+export type CampSession = {
+  id: string;         // Square ITEM_VARIATION id — the purchasable session
+  sku: string;
+  name: string;
+  amount: number;
+  price: string;
+  displayPrice: string;
+  currency: string;
+  imageUrls: string[];
+  bookable: boolean;
+  startDate?: string;
+  endDate?: string;
+  meetingTimes?: string[];
+  format?: CohortFormat;
+  instructor?: string;
+  resourceIds: string[];
+  emailImageUrl?: string;
+};
+
+/** A camp with its available sessions, as returned by the /camps endpoint. */
+export type Camp = {
+  id: string;         // Square ITEM id — stable join key for CMS content
+  name: string;
+  category: string;
+  rootCategory: string;
+  descriptionHtml: string;
+  imageUrls: string[];
+  emailImageUrl?: string;
+  sessions: CampSession[];
+  program?: string;
+  track?: string;
+};
+
+// ─── Functions ────────────────────────────────────────────────────────────────
+
+// intentionally private — returns a Temporal.PlainDate that never crosses the wire (fails admission clause 1)
 function parseDateOrNull(raw: string | undefined | null): Temporal.PlainDate | null {
   if (!raw) return null;
   try { return Temporal.PlainDate.from(raw); } catch { return null; }
@@ -103,42 +141,3 @@ export function getCampPhase(
 
   return { status: CampStatus.UPCOMING, label, isActive: false };
 }
-
-// ─── Catalog types ────────────────────────────────────────────────────────────
-
-/**
- * The public sales listing of a cohort, as represented by a Square ITEM_VARIATION.
- * Distinct from cohort.ts's `Cohort` (the LMS operational entity).
- */
-export type CampSession = {
-  id: string;         // Square ITEM_VARIATION id — the purchasable session
-  sku: string;
-  name: string;
-  amount: number;
-  price: string;
-  displayPrice: string;
-  currency: string;
-  imageUrls: string[];
-  bookable: boolean;
-  startDate?: string;
-  endDate?: string;
-  meetingTimes?: string[];
-  format?: CohortFormat;
-  instructor?: string;
-  resourceIds: string[];
-  emailImageUrl?: string;
-};
-
-/** A camp with its available sessions, as returned by the /camps endpoint. */
-export type Camp = {
-  id: string;         // Square ITEM id — stable join key for CMS content
-  name: string;
-  category: string;
-  rootCategory: string;
-  descriptionHtml: string;
-  imageUrls: string[];
-  emailImageUrl?: string;
-  sessions: CampSession[]; // renamed from `cohorts`
-  program?: string;
-  track?: string;
-};

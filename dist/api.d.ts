@@ -1,4 +1,10 @@
 import { z } from 'zod';
+/** Why a request failed, as classified by the client: the backend rejected it, or it never got through. */
+export declare const EnvelopeReason: {
+    readonly REJECTED: "rejected";
+    readonly TRANSPORT: "transport";
+};
+export type EnvelopeReason = (typeof EnvelopeReason)[keyof typeof EnvelopeReason];
 export declare const APISuccessResponseSchema: <T extends z.ZodTypeAny>(dataSchema: T) => z.ZodObject<{
     success: z.ZodLiteral<true>;
     data: T;
@@ -39,9 +45,19 @@ export type Envelope<T> = {
     success: false;
     statusCode: number;
     message: string;
-    reason: 'rejected' | 'transport';
+    reason: EnvelopeReason;
     service?: string;
     fields?: string[];
+};
+/**
+ * Generic pagination wrapper for list endpoints.
+ * Lives here, not in a domain module: it has no domain affinity, it is part of the API response contract
+ * (crosses the backend/frontend boundary) and the backend enforces its shape on every list response.
+ */
+export type Paginated<T> = {
+    items: T[];
+    count: number;
+    lastKey?: string;
 };
 /**
  * Parses a fetch Response into an Envelope<T>. Never throws.

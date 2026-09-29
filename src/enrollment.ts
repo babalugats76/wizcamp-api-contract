@@ -1,15 +1,13 @@
-// src/enrollment.ts
-// LMS / operational domain — enrollment types.
+// LMS / operational domain: enrollment lifecycle, the flat Enrollment join type and enrollment mutation/response shapes.
+// Exports EnrollmentStatus, ENROLLMENT_TRANSITIONS, Enrollment, EnrollmentSummary, CohortRoster and related inputs.
 
-import type { CohortFormat } from './cohort';
+import type { CohortFormat, CohortStatus } from './primitives';
 import type { MediaImage, MediaVideo } from './media';
 import type { CampLevel } from './camp';
-import type { UnitLabel, CohortStatus } from './cohort';
-import type { Student } from './auth';
+import type { UnitLabel, ProgressSummary } from './curriculum';
+import type { Student, OnboardingMode } from './auth';
 
-import type { ProgressSummary } from './cohort';
-
-export type OnboardingMode = 'activation' | 'access';
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 export const EnrollmentStatus = {
   PENDING_ONBOARDING: 'pending_onboarding',
@@ -18,15 +16,19 @@ export const EnrollmentStatus = {
 } as const;
 export type EnrollmentStatus = (typeof EnrollmentStatus)[keyof typeof EnrollmentStatus];
 
+// ─── Lookup maps ──────────────────────────────────────────────────────────────
+
 /**
  * Valid status transitions for an enrollment.
  * Mirrors the server-side ALLOWED_TRANSITIONS in wizcamp-backend.
  */
 export const ENROLLMENT_TRANSITIONS: Record<EnrollmentStatus, EnrollmentStatus[]> = {
-  pending_onboarding: ['active', 'removed'],
-  active:             ['removed'],
-  removed:            ['active'],
+  [EnrollmentStatus.PENDING_ONBOARDING]: [EnrollmentStatus.ACTIVE, EnrollmentStatus.REMOVED],
+  [EnrollmentStatus.ACTIVE]:             [EnrollmentStatus.REMOVED],
+  [EnrollmentStatus.REMOVED]:            [EnrollmentStatus.ACTIVE],
 };
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 export type EnrollmentCounts = {
   active: number;
@@ -39,7 +41,7 @@ export type EnrollmentCounts = {
  * Flat compound join type — enrollment row + cohort context + coalesced student identity.
  */
 export type Enrollment = {
-  // ─── Enrollment identity ──────────────────────────────────────────────────
+  // Enrollment identity
   enrollmentId: string;
   cohortSlug: string;
   status: EnrollmentStatus;
@@ -49,7 +51,7 @@ export type Enrollment = {
   onboardedAt: string | null;
   removedAt: string | null;
   updatedAt: string;
-  // ─── Cohort context ───────────────────────────────────────────────────────
+  // Cohort context
   campName: string;
   cohortName: string;
   unitLabel: UnitLabel;
@@ -61,7 +63,7 @@ export type Enrollment = {
   video: MediaVideo | null;
   level: CampLevel | null;
   cohortStatus: CohortStatus;
-  // ─── Student identity (coalesced) ─────────────────────────────────────────
+  // Student identity (coalesced)
   studentId: string | null;
   firstName: string;
   lastName: string;
@@ -93,8 +95,6 @@ export type EnrollmentCreateResponse = {
 export type StudentEnrollments = Student & {
   enrollments: Enrollment[];
 };
-
-// ─── Mutation inputs ──────────────────────────────────────────────────────────
 
 export type CreateEnrollmentInput = {
   cohortSlug:       string;

@@ -1,20 +1,20 @@
 "use strict";
-// src/api.ts
+// HTTP wire envelope shared by backend and clients, and the only module that depends on Zod.
+// Exports the response schemas, APIResponse/Envelope/Paginated types, EnvelopeReason and parseEnvelope.
 //
-// The HTTP wire envelope. Every request and response in this system goes
-// through this shape — on both success and failure, with zero exceptions.
-//
-// TWO TYPES, NOT ONE:
-//
-// `APIResponse<T>` is the wire shape — what hono-envelope.ts serializes.
-// `Envelope<T>` is the client-side parsed and classified form. It is NEVER
-// serialized. `reason` does not exist on the wire — it is information the
-// client adds while narrowing a failure into "the backend rejected this"
-// vs "we could not reach the backend at all." Do not merge these two types.
+// Two types, not one: `APIResponse<T>` is the wire shape (what hono-envelope.ts serializes). `Envelope<T>` is the
+// client-side parsed form and is never serialized; `reason` does not exist on the wire. Do not merge them.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.APIResponseSchema = exports.APIErrorResponseSchema = exports.APISuccessResponseSchema = void 0;
+exports.APIResponseSchema = exports.APIErrorResponseSchema = exports.APISuccessResponseSchema = exports.EnvelopeReason = void 0;
 exports.parseEnvelope = parseEnvelope;
 const zod_1 = require("zod");
+// ─── Constants ────────────────────────────────────────────────────────────────
+/** Why a request failed, as classified by the client: the backend rejected it, or it never got through. */
+exports.EnvelopeReason = {
+    REJECTED: 'rejected',
+    TRANSPORT: 'transport',
+};
+// ─── Zod schemas ──────────────────────────────────────────────────────────────
 const APISuccessResponseSchema = (dataSchema) => zod_1.z.object({
     success: zod_1.z.literal(true),
     data: dataSchema,
@@ -33,6 +33,7 @@ exports.APIResponseSchema = zod_1.z.discriminatedUnion('success', [
     (0, exports.APISuccessResponseSchema)(zod_1.z.unknown()),
     exports.APIErrorResponseSchema,
 ]);
+// ─── Functions ────────────────────────────────────────────────────────────────
 /**
  * Parses a fetch Response into an Envelope<T>. Never throws.
  *
@@ -50,7 +51,7 @@ async function parseEnvelope(res) {
             success: false,
             statusCode: res.status,
             message: res.ok ? 'Malformed response from server' : `Upstream error (${res.status})`,
-            reason: 'transport',
+            reason: exports.EnvelopeReason.TRANSPORT,
         };
     }
     const parsed = exports.APIResponseSchema.safeParse(json);
@@ -62,7 +63,7 @@ async function parseEnvelope(res) {
             success: false,
             statusCode: env.statusCode,
             message: env.message,
-            reason: 'rejected',
+            reason: exports.EnvelopeReason.REJECTED,
             ...(env.service && { service: env.service }),
             ...(env.fields && { fields: env.fields }),
         };
@@ -72,11 +73,10 @@ async function parseEnvelope(res) {
             success: false,
             statusCode: res.status,
             message: 'Request failed',
-            reason: 'transport',
+            reason: exports.EnvelopeReason.TRANSPORT,
         };
     }
-    // 2xx but did not match the schema — treat raw body as payload.
-    // Compatibility branch for any endpoint not yet wrapped in the envelope.
+    // 2xx but did not match the schema — compatibility branch for endpoints not yet wrapped in the envelope.
     // Delete once every route is confirmed enveloped.
     return { success: true, data: json };
 }

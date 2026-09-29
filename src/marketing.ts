@@ -1,5 +1,15 @@
-// src/marketing.ts
 // Marketing domain types — Anti-Corruption Layer for external marketing platforms.
+// Exports waitlist, newsletter and event-registration request/response shapes, plus AttendeeRole.
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+export const AttendeeRole = {
+  PARENT:  'parent',
+  STUDENT: 'student',
+} as const;
+export type AttendeeRole = (typeof AttendeeRole)[keyof typeof AttendeeRole];
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 /** What wizcamp-web POSTs to /waitlist. */
 export type WaitlistEntry = {
@@ -29,7 +39,7 @@ export type EventRegistrationInput = {
   eventSlug: string;
   fullName: string;
   email: string;
-  attendeeRole?: 'parent' | 'student';
+  attendeeRole?: AttendeeRole;
 };
 
 /** What the /events/:eventSlug/register endpoint returns on success. */

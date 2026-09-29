@@ -1,3 +1,8 @@
+export declare const AttendeeRole: {
+    readonly PARENT: "parent";
+    readonly STUDENT: "student";
+};
+export type AttendeeRole = (typeof AttendeeRole)[keyof typeof AttendeeRole];
 /** What wizcamp-web POSTs to /waitlist. */
 export type WaitlistEntry = {
     email: string;
@@ -22,7 +27,7 @@ export type EventRegistrationInput = {
     eventSlug: string;
     fullName: string;
     email: string;
-    attendeeRole?: 'parent' | 'student';
+    attendeeRole?: AttendeeRole;
 };
 /** What the /events/:eventSlug/register endpoint returns on success. */
 export type EventRegistrationResponse = {

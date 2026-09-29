@@ -1,7 +1,10 @@
-// src/curriculum.ts
-// LMS / operational domain — curriculum, page, and media types.
+// Curriculum domain: units, pages, video providers, media records and student-facing curriculum views.
+// Exports UnitLabel, PageStatus, PageLayout, VideoProvider, MediaKind, ProgressStatus, DURATION_REGEX and the related shapes.
 
-import type { MediaImage, MediaVideo } from './media';
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+/** m:ss duration — unpadded minutes, zero-padded seconds capped at 59 (e.g. '3:07'). */
+export const DURATION_REGEX = /^\d+:[0-5]\d$/;
 
 export const UnitLabel = {
   SESSION: 'session',
@@ -25,19 +28,13 @@ export const PageLayout = {
 } as const;
 export type PageLayout = (typeof PageLayout)[keyof typeof PageLayout];
 
-export const VideoSourceType = {
+export const VideoProvider = {
   EXTERNAL: 'external',
   HOSTED:   'hosted',
   LOOM:     'loom',
   YOUTUBE:  'youtube',
 } as const;
-export type VideoSourceType = (typeof VideoSourceType)[keyof typeof VideoSourceType];
-
-export type VideoSource =
-  | { type: typeof VideoSourceType.EXTERNAL; url: string }
-  | { type: typeof VideoSourceType.HOSTED;   mediaId: string }
-  | { type: typeof VideoSourceType.LOOM;     loomVideoId: string }
-  | { type: typeof VideoSourceType.YOUTUBE;  youtubeVideoId: string };
+export type VideoProvider = (typeof VideoProvider)[keyof typeof VideoProvider];
 
 export const MediaKind = {
   VIDEO: 'video',
@@ -45,6 +42,22 @@ export const MediaKind = {
   FILE:  'file',
 } as const;
 export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind];
+
+export const ProgressStatus = {
+  NOT_STARTED: 'not_started',
+  IN_PROGRESS: 'in_progress',
+  CAUGHT_UP:   'caught_up',
+  COMPLETED:   'completed',
+} as const;
+export type ProgressStatus = (typeof ProgressStatus)[keyof typeof ProgressStatus];
+
+// ─── Types ────────────────────────────────────────────────────────────────────
+
+export type VideoSource =
+  | { type: typeof VideoProvider.EXTERNAL; url: string }
+  | { type: typeof VideoProvider.HOSTED;   mediaId: string }
+  | { type: typeof VideoProvider.LOOM;     loomVideoId: string }
+  | { type: typeof VideoProvider.YOUTUBE;  youtubeVideoId: string };
 
 export type Unit = {
   unitId: string;
@@ -63,7 +76,7 @@ export type UnitSummary = Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked
 };
 
 export type PageVideo = {
-  sourceType: VideoSourceType;
+  provider: VideoProvider;
   url?: string;
   loomVideoId?: string;
   youtubeVideoId?: string;
@@ -76,7 +89,7 @@ export type PageVideo = {
 
 /** Lightweight video descriptor for list/TOC contexts. */
 export type VideoMeta = {
-  sourceType: VideoSourceType;
+  provider: VideoProvider;
   duration?: number;
 };
 
@@ -196,14 +209,11 @@ export type StudentPageContent = {
   resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
 
-/** m:ss duration — unpadded minutes, zero-padded seconds capped at 59 (e.g. '3:07'). */
-export const DURATION_RE = /^\d+:[0-5]\d$/;
-
 /** Discriminated on layout. */
 export type PageMetadata =
-  | { layout: 'doc' }
+  | { layout: typeof PageLayout.DOC }
   | {
-      layout: 'video';
+      layout: typeof PageLayout.VIDEO;
       videoSource: VideoSource;
       duration?: string;
       recommendedSpeed?: number;
@@ -235,7 +245,15 @@ export type PageViewDetail = {
   visitCount:     number;
 };
 
-// ─── Mutation inputs ──────────────────────────────────────────────────────────
+export type ProgressSummary = {
+  pagesVisited:   number;
+  pagesAvailable: number;
+  progressPct:    number;
+  unlockedUnits:  number;
+  totalUnits:     number;
+  dripPct:        number;
+  status:         ProgressStatus;
+};
 
 export type CreateUnitInput = {
   title:        string;
@@ -248,15 +266,4 @@ export type UpdateUnitInput = {
   description?: string;
   position?:    number;
   isLocked?:    boolean;
-};
-
-// Re-export media primitives consumed by curriculum types
-export type { MediaImage, MediaVideo };
-
-// ─── Pagination wrapper ───────────────────────────────────────────────────────
-
-export type Paginated<T> = {
-  items: T[];
-  count: number;
-  lastKey?: string;
 };

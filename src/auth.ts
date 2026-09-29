@@ -1,5 +1,7 @@
-// src/auth.ts
-// Authentication and user identity types.
+// Authentication and user identity types: users, students, sessions, settings and onboarding.
+// Exports UserRole, OAuthProvider, StudentStatus, UserTheme, OnboardingMode, EditorAutoSave and the Student/AuthUser/settings shapes.
+
+// ─── Constants ────────────────────────────────────────────────────────────────
 
 export const UserRole = {
   STUDENT: 'student',
@@ -7,7 +9,11 @@ export const UserRole = {
 } as const;
 export type UserRole = (typeof UserRole)[keyof typeof UserRole];
 
-export type OAuthProvider = 'google' | 'github';
+export const OAuthProvider = {
+  GOOGLE: 'google',
+  GITHUB: 'github',
+} as const;
+export type OAuthProvider = (typeof OAuthProvider)[keyof typeof OAuthProvider];
 
 export const StudentStatus = {
   ACTIVE:    'active',
@@ -22,13 +28,21 @@ export const UserTheme = {
 } as const;
 export type UserTheme = (typeof UserTheme)[keyof typeof UserTheme];
 
-export const OpenRouterKeyLimitReset = {
-  NONE:    'none',
-  DAILY:   'daily',
-  WEEKLY:  'weekly',
-  MONTHLY: 'monthly',
+/** How a student gets into the LMS after enrolling: activate a new account, or just access an existing one. */
+export const OnboardingMode = {
+  ACTIVATION: 'activation',
+  ACCESS:     'access',
 } as const;
-export type OpenRouterKeyLimitReset = (typeof OpenRouterKeyLimitReset)[keyof typeof OpenRouterKeyLimitReset];
+export type OnboardingMode = (typeof OnboardingMode)[keyof typeof OnboardingMode];
+
+export const EditorAutoSave = {
+  LIVE:   'live',
+  AUTO:   'auto',
+  MANUAL: 'manual',
+} as const;
+export type EditorAutoSave = (typeof EditorAutoSave)[keyof typeof EditorAutoSave];
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 /** Fields any authenticated user can read via GET /lms/students/me/settings */
 export type UserSettings = {
@@ -85,57 +99,9 @@ export type MagicLinkValidation = {
 export type AdminOnlySettings = {
   aiModel?: string;
   aiSystemPrompt?: string;
-  editorAutoSave?: 'live' | 'auto' | 'manual';
+  editorAutoSave?: EditorAutoSave;
   editorValidateOnType?: boolean;
 };
 
 /** Full map — what GET /lms/admin/settings returns */
 export type AdminSettings = UserSettings & AdminOnlySettings;
-
-/**
- * Complete AI API key metadata — SDK-verified against OpenRouter GetKeyData.
- * Field names match the SDK's camelCase exactly (limit, not limitUsd).
- */
-export type OpenRouterKeyMetadata = {
-  hash: string;
-  name: string;
-  label: string;
-  usage: number;
-  usageDaily: number;
-  usageWeekly: number;
-  usageMonthly: number;
-  limit: number | null;
-  limitRemaining: number | null;
-  limitReset: OpenRouterKeyLimitReset;
-  expiresAt: string | null;
-  createdAt: string;
-  updatedAt: string;
-  disabled: boolean;
-};
-
-/** PATCH /lms/admin/students/:studentId/settings/api-key */
-export type OpenRouterKeyUpdateInput = {
-  name?: string;
-  limit?: number | null;
-  limitReset?: OpenRouterKeyLimitReset;
-  disabled?: boolean;
-};
-
-/** POST /lms/admin/students/:studentId/settings/api-key */
-export type OpenRouterKeyProvisionInput = {
-  name?: string;
-  limit?: number | null;
-  limitReset?: OpenRouterKeyLimitReset;
-  expiresAt?: string | null;
-};
-
-/** POST /lms/admin/students/:studentId/settings/api-key — provision response. */
-export type OpenRouterKeyProvisionResult = OpenRouterKeyMetadata & {
-  apiKey: string;
-};
-
-/** AI model option — used by OpenRouter to describe an available model. */
-export type OpenRouterModelOption = {
-  id: string;
-  name: string;
-};

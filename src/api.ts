@@ -1,17 +1,21 @@
-// src/api.ts
+// HTTP wire envelope shared by backend and clients, and the only module that depends on Zod.
+// Exports the response schemas, APIResponse/Envelope/Paginated types, EnvelopeReason and parseEnvelope.
 //
-// The HTTP wire envelope. Every request and response in this system goes
-// through this shape — on both success and failure, with zero exceptions.
-//
-// TWO TYPES, NOT ONE:
-//
-// `APIResponse<T>` is the wire shape — what hono-envelope.ts serializes.
-// `Envelope<T>` is the client-side parsed and classified form. It is NEVER
-// serialized. `reason` does not exist on the wire — it is information the
-// client adds while narrowing a failure into "the backend rejected this"
-// vs "we could not reach the backend at all." Do not merge these two types.
+// Two types, not one: `APIResponse<T>` is the wire shape (what hono-envelope.ts serializes). `Envelope<T>` is the
+// client-side parsed form and is never serialized; `reason` does not exist on the wire. Do not merge them.
 
 import { z } from 'zod';
+
+// ─── Constants ────────────────────────────────────────────────────────────────
+
+/** Why a request failed, as classified by the client: the backend rejected it, or it never got through. */
+export const EnvelopeReason = {
+  REJECTED:  'rejected',
+  TRANSPORT: 'transport',
+} as const;
+export type EnvelopeReason = (typeof EnvelopeReason)[keyof typeof EnvelopeReason];
+
+// ─── Zod schemas ──────────────────────────────────────────────────────────────
 
 export const APISuccessResponseSchema = <T extends z.ZodTypeAny>(dataSchema: T) =>
   z.object({
@@ -34,6 +38,8 @@ export const APIResponseSchema = z.discriminatedUnion('success', [
   APIErrorResponseSchema,
 ]);
 
+// ─── Types ────────────────────────────────────────────────────────────────────
+
 export type APISuccessResponse<T> = {
   success: true;
   data: T;
@@ -51,10 +57,23 @@ export type Envelope<T> =
       success: false;
       statusCode: number;
       message: string;
-      reason: 'rejected' | 'transport';
+      reason: EnvelopeReason;
       service?: string;
       fields?: string[];
     };
+
+/**
+ * Generic pagination wrapper for list endpoints.
+ * Lives here, not in a domain module: it has no domain affinity, it is part of the API response contract
+ * (crosses the backend/frontend boundary) and the backend enforces its shape on every list response.
+ */
+export type Paginated<T> = {
+  items: T[];
+  count: number;
+  lastKey?: string;
+};
+
+// ─── Functions ────────────────────────────────────────────────────────────────
 
 /**
  * Parses a fetch Response into an Envelope<T>. Never throws.
@@ -72,7 +91,7 @@ export async function parseEnvelope<T>(res: Response): Promise<Envelope<T>> {
       success: false,
       statusCode: res.status,
       message: res.ok ? 'Malformed response from server' : `Upstream error (${res.status})`,
-      reason: 'transport',
+      reason: EnvelopeReason.TRANSPORT,
     };
   }
 
@@ -85,7 +104,7 @@ export async function parseEnvelope<T>(res: Response): Promise<Envelope<T>> {
       success: false,
       statusCode: env.statusCode,
       message: env.message,
-      reason: 'rejected',
+      reason: EnvelopeReason.REJECTED,
       ...(env.service && { service: env.service }),
       ...(env.fields && { fields: env.fields }),
     };
@@ -96,12 +115,11 @@ export async function parseEnvelope<T>(res: Response): Promise<Envelope<T>> {
       success: false,
       statusCode: res.status,
       message: 'Request failed',
-      reason: 'transport',
+      reason: EnvelopeReason.TRANSPORT,
     };
   }
 
-  // 2xx but did not match the schema — treat raw body as payload.
-  // Compatibility branch for any endpoint not yet wrapped in the envelope.
+  // 2xx but did not match the schema — compatibility branch for endpoints not yet wrapped in the envelope.
   // Delete once every route is confirmed enveloped.
   return { success: true, data: json as T };
 }

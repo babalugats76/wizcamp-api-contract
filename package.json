@@ -48,6 +48,14 @@
     "./api": {
       "types": "./dist/api.d.ts",
       "default": "./dist/api.js"
+    },
+    "./primitives": {
+      "types": "./dist/primitives.d.ts",
+      "default": "./dist/primitives.js"
+    },
+    "./openrouter": {
+      "types": "./dist/openrouter.d.ts",
+      "default": "./dist/openrouter.js"
     }
   },
   "scripts": {

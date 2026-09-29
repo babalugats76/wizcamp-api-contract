@@ -1,10 +1,8 @@
-import type { CohortFormat } from './cohort';
+import type { CohortFormat, CohortStatus } from './primitives';
 import type { MediaImage, MediaVideo } from './media';
 import type { CampLevel } from './camp';
-import type { UnitLabel, CohortStatus } from './cohort';
-import type { Student } from './auth';
-import type { ProgressSummary } from './cohort';
-export type OnboardingMode = 'activation' | 'access';
+import type { UnitLabel, ProgressSummary } from './curriculum';
+import type { Student, OnboardingMode } from './auth';
 export declare const EnrollmentStatus: {
     readonly PENDING_ONBOARDING: "pending_onboarding";
     readonly ACTIVE: "active";

@@ -1,6 +1,5 @@
 "use strict";
-// src/media.ts
-// Cross-domain transport primitives for public media resources.
-// Used by both curriculum content (curriculum.ts) and Camp listings (camp.ts).
+// Cross-domain transport primitives for public media resources, shared by curriculum content and camp listings.
+// Exports MediaImage and MediaVideo.
 Object.defineProperty(exports, "__esModule", { value: true });
 //# sourceMappingURL=media.js.map

@@ -1,4 +1,5 @@
-import type { MediaImage, MediaVideo } from './media';
+/** m:ss duration — unpadded minutes, zero-padded seconds capped at 59 (e.g. '3:07'). */
+export declare const DURATION_REGEX: RegExp;
 export declare const UnitLabel: {
     readonly SESSION: "session";
     readonly WEEK: "week";
@@ -18,32 +19,39 @@ export declare const PageLayout: {
     readonly VIDEO: "video";
 };
 export type PageLayout = (typeof PageLayout)[keyof typeof PageLayout];
-export declare const VideoSourceType: {
+export declare const VideoProvider: {
     readonly EXTERNAL: "external";
     readonly HOSTED: "hosted";
     readonly LOOM: "loom";
     readonly YOUTUBE: "youtube";
 };
-export type VideoSourceType = (typeof VideoSourceType)[keyof typeof VideoSourceType];
-export type VideoSource = {
-    type: typeof VideoSourceType.EXTERNAL;
-    url: string;
-} | {
-    type: typeof VideoSourceType.HOSTED;
-    mediaId: string;
-} | {
-    type: typeof VideoSourceType.LOOM;
-    loomVideoId: string;
-} | {
-    type: typeof VideoSourceType.YOUTUBE;
-    youtubeVideoId: string;
-};
+export type VideoProvider = (typeof VideoProvider)[keyof typeof VideoProvider];
 export declare const MediaKind: {
     readonly VIDEO: "video";
     readonly IMAGE: "image";
     readonly FILE: "file";
 };
 export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind];
+export declare const ProgressStatus: {
+    readonly NOT_STARTED: "not_started";
+    readonly IN_PROGRESS: "in_progress";
+    readonly CAUGHT_UP: "caught_up";
+    readonly COMPLETED: "completed";
+};
+export type ProgressStatus = (typeof ProgressStatus)[keyof typeof ProgressStatus];
+export type VideoSource = {
+    type: typeof VideoProvider.EXTERNAL;
+    url: string;
+} | {
+    type: typeof VideoProvider.HOSTED;
+    mediaId: string;
+} | {
+    type: typeof VideoProvider.LOOM;
+    loomVideoId: string;
+} | {
+    type: typeof VideoProvider.YOUTUBE;
+    youtubeVideoId: string;
+};
 export type Unit = {
     unitId: string;
     cohortSlug: string;
@@ -59,7 +67,7 @@ export type UnitSummary = Pick<Unit, 'unitId' | 'title' | 'position' | 'isLocked
     pages: PageSummary[];
 };
 export type PageVideo = {
-    sourceType: VideoSourceType;
+    provider: VideoProvider;
     url?: string;
     loomVideoId?: string;
     youtubeVideoId?: string;
@@ -71,7 +79,7 @@ export type PageVideo = {
 };
 /** Lightweight video descriptor for list/TOC contexts. */
 export type VideoMeta = {
-    sourceType: VideoSourceType;
+    provider: VideoProvider;
     duration?: number;
 };
 export type Page = {
@@ -194,13 +202,11 @@ export type StudentPageContent = {
     };
     resolvedMedia?: Record<string, ResolvedMedia | null>;
 };
-/** m:ss duration — unpadded minutes, zero-padded seconds capped at 59 (e.g. '3:07'). */
-export declare const DURATION_RE: RegExp;
 /** Discriminated on layout. */
 export type PageMetadata = {
-    layout: 'doc';
+    layout: typeof PageLayout.DOC;
 } | {
-    layout: 'video';
+    layout: typeof PageLayout.VIDEO;
     videoSource: VideoSource;
     duration?: string;
     recommendedSpeed?: number;
@@ -228,6 +234,15 @@ export type PageViewDetail = {
     lastVisitedAt: string;
     visitCount: number;
 };
+export type ProgressSummary = {
+    pagesVisited: number;
+    pagesAvailable: number;
+    progressPct: number;
+    unlockedUnits: number;
+    totalUnits: number;
+    dripPct: number;
+    status: ProgressStatus;
+};
 export type CreateUnitInput = {
     title: string;
     description?: string;
@@ -238,11 +253,5 @@ export type UpdateUnitInput = {
     description?: string;
     position?: number;
     isLocked?: boolean;
-};
-export type { MediaImage, MediaVideo };
-export type Paginated<T> = {
-    items: T[];
-    count: number;
-    lastKey?: string;
 };
 //# sourceMappingURL=curriculum.d.ts.map

@@ -1,12 +1,11 @@
 "use strict";
-// src/camp.ts
-// Commerce / public domain — Square catalog types.
-// CampSession is the public sales listing of a cohort (Square ITEM_VARIATION).
-// Distinct from cohort.ts's Cohort (the LMS operational entity).
+// Commerce / public domain: the Square-backed camp catalog (Camp, CampSession) and client-side camp phase display.
+// CampSession is the public sales listing of a cohort, distinct from cohort.ts's Cohort (the LMS operational entity).
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.CampStatus = exports.CampLevelColor = void 0;
 exports.getCampPhase = getCampPhase;
 const temporal_polyfill_1 = require("temporal-polyfill");
+// ─── Constants ────────────────────────────────────────────────────────────────
 exports.CampLevelColor = {
     EMERALD: 'emerald',
     SKY: 'sky',
@@ -14,12 +13,13 @@ exports.CampLevelColor = {
     ROSE: 'rose',
     VIOLET: 'violet',
 };
-// ─── Camp phase ───────────────────────────────────────────────────────────────
 exports.CampStatus = {
     UPCOMING: 'upcoming',
     IN_PROGRESS: 'in-progress',
     CONCLUDED: 'concluded',
 };
+// ─── Functions ────────────────────────────────────────────────────────────────
+// intentionally private — returns a Temporal.PlainDate that never crosses the wire (fails admission clause 1)
 function parseDateOrNull(raw) {
     if (!raw)
         return null;

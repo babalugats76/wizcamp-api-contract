@@ -1,6 +1,7 @@
-// src/media.ts
-// Cross-domain transport primitives for public media resources.
-// Used by both curriculum content (curriculum.ts) and Camp listings (camp.ts).
+// Cross-domain transport primitives for public media resources, shared by curriculum content and camp listings.
+// Exports MediaImage and MediaVideo.
+
+// ─── Types ────────────────────────────────────────────────────────────────────
 
 /** A serializable reference to a public image resource. */
 export type MediaImage = {

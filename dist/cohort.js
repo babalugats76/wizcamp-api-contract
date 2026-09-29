@@ -1,29 +1,14 @@
 "use strict";
-// src/cohort.ts
-// LMS / operational domain — cohort, progress, and student view types.
+// LMS / operational domain: the Cohort entity, admin/student cohort views, progress computation and cohort mutation inputs.
+// Sits at the top of the module graph; re-exports CohortFormat and CohortStatus from primitives for consumer compatibility.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UnitLabel = exports.ProgressStatus = exports.SLUG_REGEX = exports.CohortStatus = exports.CohortFormat = void 0;
+exports.CohortStatus = exports.CohortFormat = exports.SLUG_REGEX = void 0;
 exports.toStudentProgress = toStudentProgress;
 const curriculum_1 = require("./curriculum");
-Object.defineProperty(exports, "UnitLabel", { enumerable: true, get: function () { return curriculum_1.UnitLabel; } });
-exports.CohortFormat = {
-    FLEX: 'flex',
-    BOOT: 'boot',
-    SELF_PACED: 'self-paced',
-};
-exports.CohortStatus = {
-    DRAFT: 'draft',
-    ACTIVE: 'active',
-    CONCLUDED: 'concluded',
-};
+// ─── Constants ────────────────────────────────────────────────────────────────
 /** Regex that defines a valid cohort slug. */
 exports.SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-exports.ProgressStatus = {
-    NOT_STARTED: 'not_started',
-    IN_PROGRESS: 'in_progress',
-    CAUGHT_UP: 'caught_up',
-    COMPLETED: 'completed',
-};
+// ─── Functions ────────────────────────────────────────────────────────────────
 function toStudentProgress(curriculum) {
     const { cohort, units } = curriculum;
     const unitById = new Map(units.map(u => [u.unitId, u]));
@@ -32,10 +17,10 @@ function toStudentProgress(curriculum) {
     const availablePages = allPages.filter(p => !unitById.get(p.unitId)?.isLocked);
     const pagesAvailable = availablePages.length;
     const pagesVisited = availablePages.filter(p => visitedIds.has(p.pageId)).length;
-    const status = pagesVisited === 0 ? exports.ProgressStatus.NOT_STARTED :
-        pagesVisited < pagesAvailable ? exports.ProgressStatus.IN_PROGRESS :
-            units.some(u => u.isLocked) ? exports.ProgressStatus.CAUGHT_UP :
-                exports.ProgressStatus.COMPLETED;
+    const status = pagesVisited === 0 ? curriculum_1.ProgressStatus.NOT_STARTED :
+        pagesVisited < pagesAvailable ? curriculum_1.ProgressStatus.IN_PROGRESS :
+            units.some(u => u.isLocked) ? curriculum_1.ProgressStatus.CAUGHT_UP :
+                curriculum_1.ProgressStatus.COMPLETED;
     const sortedAvailable = [...availablePages].sort((a, b) => (unitById.get(a.unitId)?.position ?? 0) - (unitById.get(b.unitId)?.position ?? 0) || a.position - b.position);
     const lastVisited = availablePages
         .filter(p => p.lastVisitedAt !== null)
@@ -52,9 +37,9 @@ function toStudentProgress(curriculum) {
         };
     }
     function toResumeTarget() {
-        if (status === exports.ProgressStatus.COMPLETED)
+        if (status === curriculum_1.ProgressStatus.COMPLETED)
             return null;
-        if (status === exports.ProgressStatus.CAUGHT_UP) {
+        if (status === curriculum_1.ProgressStatus.CAUGHT_UP) {
             const last = sortedAvailable[sortedAvailable.length - 1];
             return last ? toProgressPage(last) : null;
         }
@@ -80,4 +65,8 @@ function toStudentProgress(curriculum) {
         dripPct: totalUnits > 0 ? Math.round(unlockedUnits / totalUnits * 100) : 0,
     };
 }
+// ─── Re-exports ───────────────────────────────────────────────────────────────
+var primitives_1 = require("./primitives");
+Object.defineProperty(exports, "CohortFormat", { enumerable: true, get: function () { return primitives_1.CohortFormat; } });
+Object.defineProperty(exports, "CohortStatus", { enumerable: true, get: function () { return primitives_1.CohortStatus; } });
 //# sourceMappingURL=cohort.js.map
