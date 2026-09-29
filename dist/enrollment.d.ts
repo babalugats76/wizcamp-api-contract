@@ -3,6 +3,7 @@ import type { MediaImage, MediaVideo } from './media';
 import type { CampLevel } from './camp';
 import type { UnitLabel, CohortStatus } from './cohort';
 import type { Student } from './auth';
+import type { ProgressSummary } from './cohort';
 export type OnboardingMode = 'activation' | 'access';
 export declare const EnrollmentStatus: {
     readonly PENDING_ONBOARDING: "pending_onboarding";
@@ -75,4 +76,14 @@ export type CreateEnrollmentInput = {
     studentLastName: string;
     parentEmail?: string;
 };
+/**
+ * Response for GET /lms/admin/cohorts/:slug/roster.
+ * Unpaginated by design — cohort sizes are bounded.
+ * Each row is a full Enrollment extended with server-computed progress scalars
+ * and last-active timestamp.
+ */
+export type CohortRoster = (Enrollment & {
+    progress: ProgressSummary;
+    lastActiveAt: string | null;
+})[];
 //# sourceMappingURL=enrollment.d.ts.map

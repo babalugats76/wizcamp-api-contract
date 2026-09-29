@@ -15,8 +15,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 // src/common/index.ts — backward-compat shim
-// Types have moved to flat files: media.ts, camp.ts, cohort.ts.
+// Types have moved to flat files: media.ts, camp.ts, cohort.ts, meeting.ts.
 __exportStar(require("../media"), exports);
 __exportStar(require("../camp"), exports);
 __exportStar(require("../cohort"), exports);
+__exportStar(require("../meeting"), exports);
 //# sourceMappingURL=index.js.map

@@ -252,3 +252,11 @@ export type UpdateUnitInput = {
 
 // Re-export media primitives consumed by curriculum types
 export type { MediaImage, MediaVideo };
+
+// ─── Pagination wrapper ───────────────────────────────────────────────────────
+
+export type Paginated<T> = {
+  items: T[];
+  count: number;
+  lastKey?: string;
+};

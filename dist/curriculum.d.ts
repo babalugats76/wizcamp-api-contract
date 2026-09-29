@@ -240,4 +240,9 @@ export type UpdateUnitInput = {
     isLocked?: boolean;
 };
 export type { MediaImage, MediaVideo };
+export type Paginated<T> = {
+    items: T[];
+    count: number;
+    lastKey?: string;
+};
 //# sourceMappingURL=curriculum.d.ts.map
