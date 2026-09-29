@@ -1,6 +1,10 @@
-export * as LMS from './lms';
-export * as Billing from './billing';
-export * as Marketing from './marketing';
-export * as Catalog from './catalog';
-export * from './common';
+export * from './cohort';
+export * from './meeting';
+export * from './enrollment';
+export * from './curriculum';
+export * from './auth';
+export * from './camp';
+export * from './billing';
+export * from './marketing';
+export * from './media';
 //# sourceMappingURL=index.d.ts.map

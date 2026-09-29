@@ -9,29 +9,57 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./cohort": {
+      "types": "./dist/cohort.d.ts",
+      "default": "./dist/cohort.js"
+    },
+    "./meeting": {
+      "types": "./dist/meeting.d.ts",
+      "default": "./dist/meeting.js"
+    },
+    "./enrollment": {
+      "types": "./dist/enrollment.d.ts",
+      "default": "./dist/enrollment.js"
+    },
+    "./curriculum": {
+      "types": "./dist/curriculum.d.ts",
+      "default": "./dist/curriculum.js"
+    },
+    "./auth": {
+      "types": "./dist/auth.d.ts",
+      "default": "./dist/auth.js"
+    },
+    "./camp": {
+      "types": "./dist/camp.d.ts",
+      "default": "./dist/camp.js"
+    },
+    "./billing": {
+      "types": "./dist/billing.d.ts",
+      "default": "./dist/billing.js"
+    },
+    "./marketing": {
+      "types": "./dist/marketing.d.ts",
+      "default": "./dist/marketing.js"
+    },
+    "./media": {
+      "types": "./dist/media.d.ts",
+      "default": "./dist/media.js"
+    },
     "./lms": {
       "types": "./dist/lms/index.d.ts",
       "default": "./dist/lms/index.js"
     },
-    "./billing": {
-      "types": "./dist/billing/index.d.ts",
-      "default": "./dist/billing/index.js"
-    },
-    "./marketing": {
-      "types": "./dist/marketing/index.d.ts",
-      "default": "./dist/marketing/index.js"
+    "./catalog": {
+      "types": "./dist/catalog/index.d.ts",
+      "default": "./dist/catalog/index.js"
     },
     "./common": {
       "types": "./dist/common/index.d.ts",
       "default": "./dist/common/index.js"
     },
     "./api": {
-      "types": "./dist/common/index.d.ts",
-      "default": "./dist/common/index.js"
-    },
-    "./catalog": {
-      "types": "./dist/catalog/index.d.ts",
-      "default": "./dist/catalog/index.js"
+      "types": "./dist/api.d.ts",
+      "default": "./dist/api.js"
     }
   },
   "scripts": {

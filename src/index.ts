@@ -1,10 +1,11 @@
-// packages/api-contract/src/index.ts
-
-// Domain namespaces — use dot notation: LMS.Cohort, Billing.RegistrationRequest etc.
-export * as LMS from './lms';
-export * as Billing from './billing';
-export * as Marketing from './marketing';
-export * as Catalog from './catalog';
-
-// Shared utilities — imported flat, no namespace needed
-export * from './common';
+// src/index.ts
+export * from './cohort';
+export * from './meeting';
+export * from './enrollment';
+export * from './curriculum';
+export * from './auth';
+export * from './camp';
+export * from './billing';
+export * from './marketing';
+export * from './media';
+// ./api is owned by #51 — add `export * from './api'` once that lands; do not duplicate.

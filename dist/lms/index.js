@@ -1,208 +1,26 @@
 "use strict";
-// packages/api-contract/src/lms/index.ts
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __exportStar = (this && this.__exportStar) || function(m, exports) {
+    for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.DURATION_RE = exports.MEETING_AUDIENCE_LABEL = exports.MEETING_TYPE_ORDER = exports.MEETING_TYPE_META = exports.OpenRouterKeyLimitReset = exports.ProgressStatus = exports.MeetingAudience = exports.MeetingSource = exports.MeetingType = exports.MediaKind = exports.VideoSourceType = exports.PageLayout = exports.PageStatus = exports.EnrollmentStatus = exports.UnitLabel = exports.SLUG_REGEX = exports.CohortStatus = exports.UserTheme = exports.StudentStatus = exports.UserRole = exports.CohortFormat = exports.CampLevelColor = void 0;
-exports.toStudentProgress = toStudentProgress;
-const common_1 = require("../common");
-Object.defineProperty(exports, "CampLevelColor", { enumerable: true, get: function () { return common_1.CampLevelColor; } });
-Object.defineProperty(exports, "CohortFormat", { enumerable: true, get: function () { return common_1.CohortFormat; } });
-// ─── Enums & Constants ───────────────────────────────────────────────────────
-exports.UserRole = {
-    STUDENT: 'student',
-    ADMIN: 'admin',
-};
-exports.StudentStatus = {
-    ACTIVE: 'active',
-    SUSPENDED: 'suspended',
-};
-exports.UserTheme = {
-    LIGHT: 'light',
-    DARK: 'dark',
-    SYSTEM: 'system',
-};
-exports.CohortStatus = {
-    DRAFT: 'draft',
-    ACTIVE: 'active',
-    CONCLUDED: 'concluded',
-};
-/** Regex that defines a valid cohort slug — lowercase alphanumeric with hyphens, no leading/trailing hyphens. */
-exports.SLUG_REGEX = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
-exports.UnitLabel = {
-    SESSION: 'session',
-    WEEK: 'week',
-    MODULE: 'module',
-    DAY: 'day',
-    PART: 'part',
-    UNIT: 'unit',
-};
-exports.EnrollmentStatus = {
-    PENDING_ONBOARDING: 'pending_onboarding',
-    ACTIVE: 'active',
-    REMOVED: 'removed',
-};
-exports.PageStatus = {
-    DRAFT: 'draft',
-    PUBLISHED: 'published',
-};
-exports.PageLayout = {
-    DOC: 'doc',
-    VIDEO: 'video',
-};
-exports.VideoSourceType = {
-    EXTERNAL: 'external',
-    HOSTED: 'hosted',
-    LOOM: 'loom',
-    YOUTUBE: 'youtube',
-};
-exports.MediaKind = {
-    VIDEO: 'video',
-    IMAGE: 'image',
-    FILE: 'file',
-};
-exports.MeetingType = {
-    CLASS: 'class', // scheduled instructional session
-    FLEX: 'flex', // flexible/async CLASS variant — student can attend any occurrence covering same material
-    OFFICE_HOURS: 'office_hours', // open Q&A / help time
-    COACHING: 'coaching', // 1:1 or small group mentoring
-    WORKSHOP: 'workshop', // hands-on focused session
-    EVENT: 'event', // non-instructional gathering, community building
-    WEBINAR: 'webinar', // presentation-style, potentially public-facing
-};
-exports.MeetingSource = {
-    ZOOM_API: 'zoom_api', // created and managed via Zoom API
-    MANUAL_LINK: 'manual_link', // join URL pasted manually; no API sync available
-};
-exports.MeetingAudience = {
-    WIZCAMPERS: 'WIZCAMPERS', // all enrolled students across all cohorts
-    FAMILIES: 'FAMILIES', // parents and guardians of enrolled students
-    COMMUNITY: 'COMMUNITY', // open registration / email list — no LMS account required
-};
-exports.ProgressStatus = {
-    NOT_STARTED: 'not_started',
-    IN_PROGRESS: 'in_progress',
-    CAUGHT_UP: 'caught_up',
-    COMPLETED: 'completed',
-};
-exports.OpenRouterKeyLimitReset = {
-    NONE: 'none',
-    DAILY: 'daily',
-    WEEKLY: 'weekly',
-    MONTHLY: 'monthly',
-};
-exports.MEETING_TYPE_META = {
-    [exports.MeetingType.CLASS]: { label: 'Class', tone: 'indigo' },
-    [exports.MeetingType.FLEX]: { label: 'Flex Class', tone: 'violet' },
-    [exports.MeetingType.OFFICE_HOURS]: { label: 'Office Hours', tone: 'sky' },
-    [exports.MeetingType.COACHING]: { label: 'Coaching', tone: 'amber' },
-    [exports.MeetingType.WORKSHOP]: { label: 'Workshop', tone: 'orange' },
-    [exports.MeetingType.EVENT]: { label: 'Event', tone: 'emerald' },
-    [exports.MeetingType.WEBINAR]: { label: 'Webinar', tone: 'teal' },
-};
-exports.MEETING_TYPE_ORDER = [
-    exports.MeetingType.CLASS,
-    exports.MeetingType.FLEX,
-    exports.MeetingType.OFFICE_HOURS,
-    exports.MeetingType.COACHING,
-    exports.MeetingType.WORKSHOP,
-    exports.MeetingType.EVENT,
-    exports.MeetingType.WEBINAR,
-];
-exports.MEETING_AUDIENCE_LABEL = {
-    [exports.MeetingAudience.WIZCAMPERS]: 'Wizcampers',
-    [exports.MeetingAudience.FAMILIES]: 'Families',
-    [exports.MeetingAudience.COMMUNITY]: 'Community',
-};
-/**
- * Pure isomorphic mapper — builds StudentProgress from ProgressInput.
- * No I/O; all inputs are pre-resolved by the caller.
- *
- * Status rules (evaluated in order):
- *   not_started → zero page views
- *   in_progress → some available pages unvisited
- *   caught_up   → all available pages visited, locked units remain
- *   completed   → all available pages visited, no locked units remain
- *
- * resumeTarget is always a navigable page — never a locked page.
- * Concluded camps: resumeTarget is always null.
- */
-function toStudentProgress(curriculum) {
-    const { cohort, units } = curriculum;
-    // Unit lookup by unitId
-    const unitById = new Map(units.map(u => [u.unitId, u]));
-    const allPages = units.flatMap(u => u.pages);
-    // Visited page IDs — firstVisitedAt is write-once (non-null = visited)
-    const visitedIds = new Set(allPages.filter(p => p.firstVisitedAt !== null).map(p => p.pageId));
-    // Available pages — published pages in unlocked units only (drip-aware)
-    const availablePages = allPages.filter(p => !unitById.get(p.unitId)?.isLocked);
-    const pagesAvailable = availablePages.length;
-    const pagesVisited = availablePages.filter(p => visitedIds.has(p.pageId)).length;
-    // Status
-    const status = pagesVisited === 0 ? exports.ProgressStatus.NOT_STARTED :
-        pagesVisited < pagesAvailable ? exports.ProgressStatus.IN_PROGRESS :
-            units.some(u => u.isLocked) ? exports.ProgressStatus.CAUGHT_UP :
-                exports.ProgressStatus.COMPLETED;
-    // Sort available pages by unit position then page position
-    const sortedAvailable = [...availablePages].sort((a, b) => (unitById.get(a.unitId)?.position ?? 0) - (unitById.get(b.unitId)?.position ?? 0) || a.position - b.position);
-    // Last visited available page — scoped to unlocked units so resumeTarget
-    // for CAUGHT_UP is always navigable.
-    const lastVisited = availablePages
-        .filter(p => p.lastVisitedAt !== null)
-        .reduce((acc, p) => (!acc || p.lastVisitedAt > acc.lastVisitedAt ? p : acc), null);
-    // Helper: build ResumeTarget from a StudentCurriculumPage
-    function toProgressPage(page) {
-        const unit = unitById.get(page.unitId);
-        return {
-            slug: page.slug,
-            title: page.title,
-            unitTitle: unit?.title ?? '',
-            unitPosition: unit?.position ?? 0,
-            unitLabel: cohort.unitLabel,
-            pagePosition: page.position,
-        };
-    }
-    // resumeTarget — single navigable destination for the CTA.
-    // Three cases only. The /learn/:cohortSlug router owns first-page resolution
-    // for COMPLETED and CONCLUDED — toResumeTarget returns null for those.
-    function toResumeTarget() {
-        if (status === exports.ProgressStatus.COMPLETED) {
-            return null;
-        }
-        if (status === exports.ProgressStatus.CAUGHT_UP) {
-            const last = sortedAvailable[sortedAvailable.length - 1];
-            return last ? toProgressPage(last) : null;
-        }
-        // NOT_STARTED + IN_PROGRESS unified: forward-scan from lastVisited,
-        // fall back to beginning (handles mid-sequence inserts and zero-visits case).
-        const lastIdx = lastVisited
-            ? sortedAvailable.findIndex(p => p.pageId === lastVisited.pageId)
-            : -1;
-        const next = (lastIdx >= 0 ? sortedAvailable.slice(lastIdx + 1) : [])
-            .find(p => !visitedIds.has(p.pageId))
-            ?? sortedAvailable.find(p => !visitedIds.has(p.pageId))
-            ?? sortedAvailable[0]; // absorbs NOT_STARTED: all pages unvisited, return first
-        return next ? toProgressPage(next) : null;
-    }
-    const unlockedUnits = units.filter(u => !u.isLocked).length;
-    const totalUnits = units.length;
-    return {
-        status,
-        resumeTarget: toResumeTarget(),
-        pagesVisited,
-        pagesAvailable,
-        progressPct: pagesAvailable > 0 ? Math.round(pagesVisited / pagesAvailable * 100) : 0,
-        unlockedUnits,
-        totalUnits,
-        dripPct: totalUnits > 0 ? Math.round(unlockedUnits / totalUnits * 100) : 0,
-    };
-}
-// ─── Page Editor Contract ────────────────────────────────────────────────────
-/**
- * Canonical page-save payload shapes and revision types — single source of truth
- * shared by wizcamp-backend (admin/pages.router.ts) and wizcamp-lms (use-page-editor /
- * blockers.ts gate). Hand-mirrored local copies are not permitted. This package is
- * types-and-constants only: consumers own their own validation — the contract owns
- * the shapes.
- */
-/** m:ss duration — unpadded minutes, zero-padded seconds capped at 59 (e.g. '3:07'). */
-exports.DURATION_RE = /^\d+:[0-5]\d$/;
+// src/lms/index.ts — backward-compat shim
+// All types have moved to flat files in src/. Import from the new locations:
+//   @wizcamp/api-contract/cohort, /meeting, /enrollment, /curriculum, /auth
+// This shim exists for consumer repos that haven't migrated their imports yet.
+__exportStar(require("../cohort"), exports);
+__exportStar(require("../meeting"), exports);
+__exportStar(require("../enrollment"), exports);
+__exportStar(require("../curriculum"), exports);
+__exportStar(require("../auth"), exports);
 //# sourceMappingURL=index.js.map
