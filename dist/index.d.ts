@@ -7,4 +7,5 @@ export * from './camp';
 export * from './billing';
 export * from './marketing';
 export * from './media';
+export * from './api';
 //# sourceMappingURL=index.d.ts.map

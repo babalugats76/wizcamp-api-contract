@@ -24,5 +24,5 @@ __exportStar(require("./camp"), exports);
 __exportStar(require("./billing"), exports);
 __exportStar(require("./marketing"), exports);
 __exportStar(require("./media"), exports);
-// ./api is owned by #51 — add `export * from './api'` once that lands; do not duplicate.
+__exportStar(require("./api"), exports);
 //# sourceMappingURL=index.js.map

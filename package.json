@@ -64,10 +64,21 @@
   },
   "scripts": {
     "build": "npx tsc",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist",
+    "test": "vitest run"
+  },
+  "peerDependencies": {
+    "zod": "^4.5.2"
+  },
+  "peerDependenciesMeta": {
+    "zod": {
+      "optional": false
+    }
   },
   "devDependencies": {
-    "typescript": "^5.7.0"
+    "typescript": "^5.7.0",
+    "vitest": "^5.0.1",
+    "zod": "^4.5.2"
   },
   "dependencies": {
     "temporal-polyfill": "^1.0.5"

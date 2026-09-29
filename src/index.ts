@@ -8,4 +8,4 @@ export * from './camp';
 export * from './billing';
 export * from './marketing';
 export * from './media';
-// ./api is owned by #51 — add `export * from './api'` once that lands; do not duplicate.
+export * from './api';
