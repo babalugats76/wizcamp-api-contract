@@ -1,5 +1,5 @@
 {
-  "name": "@wizcamp/api-contract",
+  "name": "@wizcamp/core",
   "version": "0.1.0",
   "private": true,
   "main": "dist/index.js",
@@ -44,18 +44,6 @@
     "./media": {
       "types": "./dist/media.d.ts",
       "default": "./dist/media.js"
-    },
-    "./lms": {
-      "types": "./dist/lms/index.d.ts",
-      "default": "./dist/lms/index.js"
-    },
-    "./catalog": {
-      "types": "./dist/catalog/index.d.ts",
-      "default": "./dist/catalog/index.js"
-    },
-    "./common": {
-      "types": "./dist/common/index.d.ts",
-      "default": "./dist/common/index.js"
     },
     "./api": {
       "types": "./dist/api.d.ts",
