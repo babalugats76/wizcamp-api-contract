@@ -2,8 +2,10 @@
 // src/cohort.ts
 // LMS / operational domain — cohort, progress, and student view types.
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProgressStatus = exports.SLUG_REGEX = exports.CohortStatus = exports.CohortFormat = void 0;
+exports.UnitLabel = exports.ProgressStatus = exports.SLUG_REGEX = exports.CohortStatus = exports.CohortFormat = void 0;
 exports.toStudentProgress = toStudentProgress;
+const curriculum_1 = require("./curriculum");
+Object.defineProperty(exports, "UnitLabel", { enumerable: true, get: function () { return curriculum_1.UnitLabel; } });
 exports.CohortFormat = {
     FLEX: 'flex',
     BOOT: 'boot',

@@ -3,7 +3,8 @@
 
 import type { MediaImage, MediaVideo } from './media';
 import type { CampLevel } from './camp';
-import type { UnitLabel, StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail } from './curriculum';
+import type { StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail } from './curriculum';
+import { UnitLabel } from './curriculum';
 import type { EnrollmentSummary } from './enrollment';
 import type { MeetingSlot } from './meeting';
 import type { Student } from './auth';
@@ -234,4 +235,5 @@ export type UpdateCohortInput = Partial<CreateCohortInput> & {
 };
 
 // Re-export types that other files import from cohort.ts
-export type { UnitLabel, StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail };
+export { UnitLabel };
+export type { StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail };

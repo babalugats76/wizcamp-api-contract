@@ -1,6 +1,7 @@
 import type { MediaImage, MediaVideo } from './media';
 import type { CampLevel } from './camp';
-import type { UnitLabel, StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail } from './curriculum';
+import type { StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail } from './curriculum';
+import { UnitLabel } from './curriculum';
 import type { EnrollmentSummary } from './enrollment';
 import type { MeetingSlot } from './meeting';
 import type { Student } from './auth';
@@ -122,5 +123,6 @@ export type CreateCohortInput = {
 export type UpdateCohortInput = Partial<CreateCohortInput> & {
     status?: CohortStatus;
 };
-export type { UnitLabel, StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail };
+export { UnitLabel };
+export type { StudentCurriculumUnit, StudentCurriculumPage, UnitSummary, CohortCurriculum, PageViewDetail };
 //# sourceMappingURL=cohort.d.ts.map
