@@ -1,12 +1,34 @@
 import type { CohortFormat, CohortStatus } from './primitives';
 import type { MediaImage, MediaVideo } from './media';
-import type { CampLevel } from './camp';
 import type { ProgressSummary, StudentCurriculumUnit, PageViewDetail, UnitLabel } from './curriculum';
 import type { EnrollmentCounts, EnrollmentSummary } from './enrollment';
 import type { MeetingSlot } from './meeting';
 import type { Student } from './auth';
 /** Regex that defines a valid cohort slug. */
 export declare const SLUG_REGEX: RegExp;
+/**
+ * Instructional level display token — set by admin at cohort-creation time.
+ * Enough to render a badge. Resolved from the local LEVELS constant in the
+ * backend mapper; the contract carries the full shape so consumers need no lookup.
+ * Lives in cohort.ts (LMS domain). Promotes to primitives.ts only if a second
+ * non-LMS domain ever needs it.
+ */
+export type ExperienceLevel = {
+    rank: number;
+    name: string;
+    tagline: string;
+    color: string;
+};
+/** Program display token on a cohort — enough to render a badge. */
+export type CohortProgram = {
+    name: string;
+    accent?: string;
+};
+/** Track display token on a cohort — enough to render a badge. */
+export type CohortTrack = {
+    name: string;
+    color?: string;
+};
 export type Cohort = {
     cohortSlug: string;
     campName: string;
@@ -18,7 +40,9 @@ export type Cohort = {
     endDate: string;
     image: MediaImage | null;
     video: MediaVideo | null;
-    level: CampLevel | null;
+    level?: ExperienceLevel | null;
+    program?: CohortProgram | null;
+    track?: CohortTrack | null;
     status: CohortStatus;
     createdAt: string;
     updatedAt: string;
@@ -89,7 +113,9 @@ export type CreateCohortInput = {
     endDate: string;
     image?: MediaImage;
     video?: MediaVideo;
-    level?: CampLevel;
+    level?: ExperienceLevel | null;
+    program?: CohortProgram | null;
+    track?: CohortTrack | null;
 };
 export type UpdateCohortInput = Partial<CreateCohortInput> & {
     status?: CohortStatus;

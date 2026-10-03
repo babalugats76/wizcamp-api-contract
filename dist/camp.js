@@ -2,17 +2,10 @@
 // Commerce / public domain: the Square-backed camp catalog (Camp, CampSession) and client-side camp phase display.
 // CampSession is the public sales listing of a cohort, distinct from cohort.ts's Cohort (the LMS operational entity).
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CampStatus = exports.CampLevelColor = void 0;
+exports.CampStatus = void 0;
 exports.getCampPhase = getCampPhase;
 const temporal_polyfill_1 = require("temporal-polyfill");
 // ─── Constants ────────────────────────────────────────────────────────────────
-exports.CampLevelColor = {
-    EMERALD: 'emerald',
-    SKY: 'sky',
-    AMBER: 'amber',
-    ROSE: 'rose',
-    VIOLET: 'violet',
-};
 exports.CampStatus = {
     UPCOMING: 'upcoming',
     IN_PROGRESS: 'in-progress',

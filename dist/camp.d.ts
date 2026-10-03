@@ -1,32 +1,11 @@
 import { Temporal } from 'temporal-polyfill';
 import type { CohortFormat } from './primitives';
-export declare const CampLevelColor: {
-    readonly EMERALD: "emerald";
-    readonly SKY: "sky";
-    readonly AMBER: "amber";
-    readonly ROSE: "rose";
-    readonly VIOLET: "violet";
-};
-export type CampLevelColor = (typeof CampLevelColor)[keyof typeof CampLevelColor];
 export declare const CampStatus: {
     readonly UPCOMING: "upcoming";
     readonly IN_PROGRESS: "in-progress";
     readonly CONCLUDED: "concluded";
 };
 export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
-/** Difficulty level number — 1 (beginner) through 5 (advanced). */
-export type CampLevelNumber = 1 | 2 | 3 | 4 | 5;
-/**
- * Structured camp difficulty level — serializable, no React component references.
- * The display icon is resolved client-side from the `level` number and is never
- * stored or transmitted.
- */
-export type CampLevel = {
-    level: CampLevelNumber;
-    name: string;
-    tagline: string;
-    color: CampLevelColor;
-};
 /**
  * Client-computed display state for a camp cohort.
  * Returned by getCampPhase().

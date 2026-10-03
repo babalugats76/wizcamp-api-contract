@@ -3,7 +3,7 @@
 
 import type { CohortFormat, CohortStatus } from './primitives';
 import type { MediaImage, MediaVideo } from './media';
-import type { CampLevel } from './camp';
+import type { ExperienceLevel, CohortProgram, CohortTrack } from './cohort';
 import type { UnitLabel, ProgressSummary } from './curriculum';
 import type { Student, OnboardingMode } from './auth';
 
@@ -61,7 +61,9 @@ export type Enrollment = {
   endDate: string;
   image: MediaImage | null;
   video: MediaVideo | null;
-  level: CampLevel | null;
+  level?:   ExperienceLevel | null;
+  program?: CohortProgram   | null;
+  track?:   CohortTrack     | null;
   cohortStatus: CohortStatus;
   // Student identity (coalesced)
   studentId: string | null;

@@ -6,15 +6,6 @@ import type { CohortFormat } from './primitives';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
-export const CampLevelColor = {
-  EMERALD: 'emerald',
-  SKY:     'sky',
-  AMBER:   'amber',
-  ROSE:    'rose',
-  VIOLET:  'violet',
-} as const;
-export type CampLevelColor = (typeof CampLevelColor)[keyof typeof CampLevelColor];
-
 export const CampStatus = {
   UPCOMING:    'upcoming',
   IN_PROGRESS: 'in-progress',
@@ -23,21 +14,6 @@ export const CampStatus = {
 export type CampStatus = (typeof CampStatus)[keyof typeof CampStatus];
 
 // ─── Types ────────────────────────────────────────────────────────────────────
-
-/** Difficulty level number — 1 (beginner) through 5 (advanced). */
-export type CampLevelNumber = 1 | 2 | 3 | 4 | 5;
-
-/**
- * Structured camp difficulty level — serializable, no React component references.
- * The display icon is resolved client-side from the `level` number and is never
- * stored or transmitted.
- */
-export type CampLevel = {
-  level: CampLevelNumber;
-  name: string;    // e.g. "Builder"
-  tagline: string; // e.g. "Time to create."
-  color: CampLevelColor;
-};
 
 /**
  * Client-computed display state for a camp cohort.
